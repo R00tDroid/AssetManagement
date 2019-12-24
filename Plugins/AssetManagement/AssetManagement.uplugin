@@ -1,0 +1,23 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "AssetManagement",
+  "Description": "",
+  "Category": "Other",
+  "CreatedBy": "Sander Brouwers",
+  "CreatedByURL": "http://sanderbrouwers.info",
+  "DocsURL": "",
+  "MarketplaceURL": "",
+  "SupportURL": "",
+  "CanContainContent": false,
+  "IsBetaVersion": true,
+  "Installed": false,
+  "Modules": [
+    {
+      "Name": "AssetManagement",
+      "Type": "Editor",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
