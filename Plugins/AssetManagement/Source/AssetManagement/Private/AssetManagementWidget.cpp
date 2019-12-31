@@ -2,9 +2,9 @@
 #include "AssetManagement.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SBorder.h"
-#include "Widgets/Layout/SScrollBox.h" 
-#include "Widgets/Input/SButton.h" 
-#include "Widgets/Input/SSearchBox.h" 
+#include "Widgets/Layout/SScrollBox.h"
+#include "Widgets/Input/SButton.h"
+#include "Widgets/Input/SSearchBox.h"
 #include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Widgets/Input/SCheckBox.h"
@@ -33,7 +33,7 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 				]
 			]
 
-		+ SVerticalBox::Slot()
+			+ SVerticalBox::Slot()
 			.AutoHeight()
 			[
 				SNew(SSeparator)
@@ -41,26 +41,26 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 			]
 
 
-		+ SVerticalBox::Slot()
+			+ SVerticalBox::Slot()
 			.AutoHeight()
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
-				.FillWidth(1.0f)
-				.Padding(FMargin(5.0f))
-				.VAlign(VAlign_Center)
+				  .FillWidth(1.0f)
+				  .Padding(FMargin(5.0f))
+				  .VAlign(VAlign_Center)
 				[
 					SNew(STextBlock)
 					.Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
 				]
 
 				+ SHorizontalBox::Slot()
-				.AutoWidth()
-				.Padding(FMargin(5.0f))
+				  .AutoWidth()
+				  .Padding(FMargin(5.0f))
 				[
 					SNew(SButton)
 					.OnClicked(FOnClicked::CreateSP(this, &SWidgetAssetManagement::RequestRescan))
-					.VAlign(VAlign_Center)
+					.VAlign(VAlign_Fill)
 					[
 						SNew(STextBlock)
 						.Font(FCoreStyle::GetDefaultFontStyle("Regular", 12))
@@ -74,7 +74,8 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 
 void SWidgetAssetManagement::Start()
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
+		TEXT("AssetRegistry"));
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
 	if (AssetRegistry.IsLoadingAssets())
@@ -89,35 +90,30 @@ void SWidgetAssetManagement::Start()
 
 void SWidgetAssetManagement::BindToAssetRegistry()
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
+		TEXT("AssetRegistry"));
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
 	AssetRegistry.OnAssetAdded().AddSP(this, &SWidgetAssetManagement::OnAssetAdded);
 	AssetRegistry.OnAssetRemoved().AddSP(this, &SWidgetAssetManagement::OnAssetUpdated);
 	AssetRegistry.OnAssetRemoved().AddSP(this, &SWidgetAssetManagement::OnAssetRemoved);
 	AssetRegistry.OnAssetRenamed().AddSP(this, &SWidgetAssetManagement::OnAssetRenamed);
-
-	//PopulateAssets();
 }
 
 void SWidgetAssetManagement::OnAssetAdded(const FAssetData&)
 {
-
 }
 
 void SWidgetAssetManagement::OnAssetUpdated(const FAssetData&)
 {
-
 }
 
 void SWidgetAssetManagement::OnAssetRemoved(const FAssetData&)
 {
-
 }
 
 void SWidgetAssetManagement::OnAssetRenamed(const FAssetData&, const FString&)
 {
-
 }
 
 FReply SWidgetAssetManagement::RequestRescan()
@@ -129,7 +125,8 @@ FReply SWidgetAssetManagement::RequestRescan()
 
 void SWidgetAssetManagement::PopulateAssets()
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
+		TEXT("AssetRegistry"));
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
 	Assets.Empty();
@@ -156,9 +153,9 @@ void SWidgetAssetManagement::PopulateAssets()
 	{
 		FAssetData& Asset = Assets[i];
 
-		if(!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
+		if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
 		{
-			if (Assets.IsValidIndex(i)) 
+			if (Assets.IsValidIndex(i))
 			{
 				Assets.RemoveAt(i);
 				i--;
@@ -168,9 +165,9 @@ void SWidgetAssetManagement::PopulateAssets()
 
 	TMap<FAssetData, uint16> References;
 
-	for (FAssetData& World : Worlds) 
+	for (FAssetData& World : Worlds)
 	{
-		TArray<FAssetData> ToSearch = { World };
+		TArray<FAssetData> ToSearch = {World};
 		TArray<FAssetData> Searched;
 
 		while (ToSearch.Num() > 0)
@@ -218,8 +215,8 @@ void SWidgetAssetManagement::PopulateAssets()
 		a_ref = 0;
 		b_ref = 0;
 
-		if (References.Contains(A))	a_ref = References[A];
-		if (References.Contains(B))	b_ref = References[B];
+		if (References.Contains(A)) a_ref = References[A];
+		if (References.Contains(B)) b_ref = References[B];
 
 		return a_ref < b_ref;
 	});
@@ -230,23 +227,44 @@ void SWidgetAssetManagement::PopulateAssets()
 
 	if (difference > 0)
 	{
-		for (int i = 0; i < std::abs(difference); i++) {
+		for (int i = 0; i < FMath::Abs(difference); i++)
+		{
 			int index = pre_count + i;
 
 			SVerticalBox::FSlot& slot = asset_list->AddSlot();
 			slot
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
+				  .FillWidth(1)
+				  .VAlign(EVerticalAlignment::VAlign_Center)
 				[
-					SNew(SVerticalBox)
-					+ SVerticalBox::Slot()
+					SNew(STextBlock)
+					.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
+					.Clipping(EWidgetClipping::ClipToBounds)
+				]
+
+				+ SHorizontalBox::Slot()
+				.AutoWidth()
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+					.Padding(2)
 					[
-						SNew(STextBlock)
-						.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
-					] + SVerticalBox::Slot()
-					[
-						SNew(STextBlock)
-						.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
+						SNew(SButton)
 					]
-				];
+					+ SHorizontalBox::Slot()
+					.Padding(2)
+					[
+						SNew(SButton)
+					]
+					+ SHorizontalBox::Slot()
+					.Padding(2)
+					[
+						SNew(SButton)
+					]
+				]
+			];
 
 			slot.Padding(FMargin(4));
 		}
@@ -255,7 +273,8 @@ void SWidgetAssetManagement::PopulateAssets()
 	{
 		for (int i = 0; i < std::abs(difference); i++)
 		{
-			asset_list->RemoveSlot(asset_list.Get()->GetChildren()->GetChildAt(asset_list.Get()->GetChildren()->Num() - 1));
+			asset_list->RemoveSlot(
+				asset_list.Get()->GetChildren()->GetChildAt(asset_list.Get()->GetChildren()->Num() - 1));
 		}
 	}
 
@@ -263,16 +282,14 @@ void SWidgetAssetManagement::PopulateAssets()
 	{
 		SVerticalBox* container = static_cast<SVerticalBox*>(&asset_list.Get()->GetChildren()->GetChildAt(i).Get());
 		TSharedRef<STextBlock> name_label = StaticCastSharedRef<STextBlock>(container->GetChildren()->GetChildAt(0));
-		TSharedRef<STextBlock> ref_label = StaticCastSharedRef<STextBlock>(container->GetChildren()->GetChildAt(1));
 
-		name_label->SetText(FText::FromString(Assets[i].PackageName.ToString()));
+		name_label->SetText(FText::FromString(Assets[i].AssetName.ToString()));
+		name_label->SetToolTipText(FText::FromString(Assets[i].PackageName.ToString()));
 
 		uint16 refCount = 0;
-		if(References.Contains(Assets[i]))
+		if (References.Contains(Assets[i]))
 		{
 			refCount = References[Assets[i]];
 		}
-
-		ref_label->SetText(FText::FromString(FString::FromInt(refCount) + " (" + Assets[i].GetClass()->GetName() + ")"));
 	}
 }
