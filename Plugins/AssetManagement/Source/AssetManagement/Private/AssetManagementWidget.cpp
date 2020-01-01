@@ -273,18 +273,21 @@ void SWidgetAssetManagement::PopulateAssets()
 					.Padding(2)
 					[
 						SNew(SButton)
+						.ToolTip(SNew(SActionToolTip))
 					]
 
 					+ SHorizontalBox::Slot()
 					.Padding(2)
 					[
 						SNew(SButton)
+						.ToolTip(SNew(SActionToolTip))
 					]
 
 					+ SHorizontalBox::Slot()
 					.Padding(2)
 					[
 						SNew(SButton)
+						.ToolTip(SNew(SActionToolTip))
 					]
 				]
 			];
@@ -315,7 +318,23 @@ void SWidgetAssetManagement::PopulateAssets()
 		for (int j = 0; j < 3; j++)
 		{
 			TSharedRef<SButton> button = StaticCastSharedRef<SButton>(button_container->GetChildren()->GetChildAt(j));
-			button->SetToolTipText(FText::FromString("Test"));
+			TSharedPtr<SActionToolTip> tooltip = StaticCastSharedPtr<SActionToolTip>(button->GetToolTip());
+
+			if (j == 0)
+			{
+				tooltip->SetHeading("Unused asset");
+				tooltip->SetContent("Click to delete resource");
+			}
+			else if (j == 1)
+			{
+				tooltip->SetHeading("Improper naming");
+				tooltip->SetContent("Suggested asset name: " + Assets[i].AssetName.ToString() + "\nClick to apply naming");
+			}
+			else if (j == 2)
+			{
+				tooltip->SetHeading("Redirector");
+				tooltip->SetContent("Click to fix redirection");
+			}
 		}
 
 		name_label->SetText(FText::FromString(Assets[i].AssetName.ToString()));
