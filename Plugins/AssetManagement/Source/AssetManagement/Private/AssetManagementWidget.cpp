@@ -323,17 +323,17 @@ void SWidgetAssetManagement::PopulateAssets()
 			if (j == 0)
 			{
 				tooltip->SetHeading("Unused asset");
-				tooltip->SetContent("Click to delete resource");
+				tooltip->SetContent("This asset is not used by a playable level.\n\nClick to delete");
 			}
 			else if (j == 1)
 			{
 				tooltip->SetHeading("Improper naming");
-				tooltip->SetContent("Suggested asset name: " + Assets[i].AssetName.ToString() + "\nClick to apply naming");
+				tooltip->SetContent("The name of this asset does not follow the defined format.\nSuggested asset name: " + Assets[i].AssetName.ToString() + ".\n\nClick to apply naming");
 			}
 			else if (j == 2)
 			{
 				tooltip->SetHeading("Redirector");
-				tooltip->SetContent("Click to fix redirection");
+				tooltip->SetContent("This asset redirects it's reference to another asset.\n\nClick to fix redirection");
 			}
 		}
 
