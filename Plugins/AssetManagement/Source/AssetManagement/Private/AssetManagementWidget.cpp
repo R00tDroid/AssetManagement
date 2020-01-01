@@ -13,6 +13,7 @@
 #include "AssetRegistryModule.h"
 #include "IAssetRegistry.h"
 #include "Engine/World.h"
+#include "Editor.h"
 
 void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 {
@@ -176,8 +177,6 @@ void SWidgetAssetManagement::PopulateAssets()
 			ToSearch.RemoveAt(0);
 			Searched.Add(Asset);
 
-			UE_LOG(AssetManagementLog, Warning, TEXT("Scanning: %s"), *Asset.PackageName.ToString());
-
 			if (!References.Contains(Asset))
 			{
 				References.Add(Asset, 1);
@@ -245,6 +244,28 @@ void SWidgetAssetManagement::PopulateAssets()
 				]
 
 				+ SHorizontalBox::Slot()
+				  .AutoWidth()
+				  .Padding(2)
+				  .VAlign(EVerticalAlignment::VAlign_Center)
+				[
+					SNew(SBox)
+					.WidthOverride(20)
+					.HeightOverride(20)
+					[
+						SNew(SButton)
+						.ForegroundColor(FSlateColor(FLinearColor(0, 0, 0, 0)))
+						.ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
+						.ContentPadding(4.0f)
+						.ForegroundColor(FSlateColor::UseForeground())
+						[
+							SNew(SImage)
+							.Image(FEditorStyle::GetBrush("PropertyWindow.Button_Browse"))
+							.ColorAndOpacity(FSlateColor::UseForeground())
+						]
+					]
+				]
+
+				+ SHorizontalBox::Slot()
 				.AutoWidth()
 				[
 					SNew(SHorizontalBox)
@@ -253,11 +274,13 @@ void SWidgetAssetManagement::PopulateAssets()
 					[
 						SNew(SButton)
 					]
+
 					+ SHorizontalBox::Slot()
 					.Padding(2)
 					[
 						SNew(SButton)
 					]
+
 					+ SHorizontalBox::Slot()
 					.Padding(2)
 					[
@@ -280,11 +303,33 @@ void SWidgetAssetManagement::PopulateAssets()
 
 	for (int i = 0; i < asset_list.Get()->GetChildren()->Num(); i++)
 	{
-		SVerticalBox* container = static_cast<SVerticalBox*>(&asset_list.Get()->GetChildren()->GetChildAt(i).Get());
+		SHorizontalBox* container = static_cast<SHorizontalBox*>(&asset_list.Get()->GetChildren()->GetChildAt(i).Get());
+		
 		TSharedRef<STextBlock> name_label = StaticCastSharedRef<STextBlock>(container->GetChildren()->GetChildAt(0));
+		TSharedRef<SBox> browse_button_container = StaticCastSharedRef<SBox>(container->GetChildren()->GetChildAt(1));
+		TSharedRef<SHorizontalBox> button_container = StaticCastSharedRef<SHorizontalBox>(container->GetChildren()->GetChildAt(2));
+		
+		TSharedRef<SButton> browse_button = StaticCastSharedRef<SButton>(browse_button_container->GetChildren()->GetChildAt(0));
+		
+
+		for (int j = 0; j < 3; j++)
+		{
+			TSharedRef<SButton> button = StaticCastSharedRef<SButton>(button_container->GetChildren()->GetChildAt(j));
+			button->SetToolTipText(FText::FromString("Test"));
+		}
 
 		name_label->SetText(FText::FromString(Assets[i].AssetName.ToString()));
 		name_label->SetToolTipText(FText::FromString(Assets[i].PackageName.ToString()));
+
+		FAssetData target = Assets[i];
+		browse_button->SetOnClicked(FOnClicked::CreateLambda([target]()
+		{
+			TArray<FAssetData> AssetDataList;
+			AssetDataList.Add(target);
+			GEditor->SyncBrowserToObjects(AssetDataList);
+			
+			return FReply::Handled();
+		}));
 
 		uint16 refCount = 0;
 		if (References.Contains(Assets[i]))
