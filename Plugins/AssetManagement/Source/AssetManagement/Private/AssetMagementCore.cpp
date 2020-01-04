@@ -71,21 +71,59 @@ void AssetManager::RequestRescan()
 	ScanAssets();
 }
 
-//TODO implement asset update handling
-void AssetManager::OnAssetAdded(const FAssetData&)
+void AssetManager::OnAssetAdded(const FAssetData& Asset)
 {
+	bool found = false;
+	AssetLock.Lock();
+	for(FAssetInfo& info : Assets)
+	{
+		if (info.Data == Asset) { found = true; break; }
+	}
+	AssetLock.Unlock();
+	if (found) return;
+	
+	//TODO execute on seperate thread
+	TArray<FAssetInfo> NewAssets = { {Asset, {}} };
+	ProcessAssets(NewAssets);
+
+	if (NewAssets.Num() > 0) 
+	{
+		AssetLock.Lock();
+		for (FAssetInfo& info : NewAssets)
+		{
+			Assets.Add(info);
+		}
+		AssetLock.Unlock();
+		OnAssetListUpdated.ExecuteIfBound();
+	}
 }
 
 void AssetManager::OnAssetUpdated(const FAssetData&)
 {
+	RequestRescan(); //TODO redo dependency scan
 }
 
 void AssetManager::OnAssetRenamed(const FAssetData&, const FString&)
 {
+	RequestRescan(); //TODO improve renamed asset handling
 }
 
-void AssetManager::OnAssetRemoved(const FAssetData&)
+void AssetManager::OnAssetRemoved(const FAssetData& Asset)
 {
+	bool changed = false;
+	AssetLock.Lock();
+	for (int i = 0; i < Assets.Num(); i++)
+	{
+		if (Assets[i].Data == Asset) 
+		{
+			Assets.RemoveAt(i);
+			i--;
+			changed = true;
+		}
+	}
+	AssetLock.Unlock();
+	
+	if(changed) OnAssetListUpdated.ExecuteIfBound();
 }
 
 void AssetManager::BindToAssetRegistry()
@@ -128,8 +166,29 @@ void AssetManager::ScanAssets() //TODO perform scan on worker thread
 	TArray<FAssetData> RawAssets;
 	bool res = AssetRegistry.GetAllAssets(RawAssets, true);
 
+	TArray<FAssetInfo> NewAssets;
+
+	for (FAssetData Asset : RawAssets)
+	{
+		NewAssets.Add({ Asset, {} });
+	}
+
+	ProcessAssets(NewAssets);
+
+	AssetLock.Lock();
+	Assets = NewAssets;
+	AssetLock.Unlock();
+	
+	OnAssetListUpdated.ExecuteIfBound();
+}
+
+void AssetManager::ProcessAssets(TArray<FAssetInfo>& NewAssets)
+{
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+	
 	TArray<FAssetData> Worlds;
-	res = AssetRegistry.GetAssetsByClass(UWorld::StaticClass()->GetFName(), Worlds, true);
+	AssetRegistry.GetAssetsByClass(UWorld::StaticClass()->GetFName(), Worlds, true);
 
 	for (int32 i = 0; i < Worlds.Num(); i++)
 	{
@@ -145,26 +204,18 @@ void AssetManager::ScanAssets() //TODO perform scan on worker thread
 		}
 	}
 
-	for (int32 i = 0; i < RawAssets.Num(); i++)
+	for (int32 i = 0; i < NewAssets.Num(); i++)
 	{
-		FAssetData& Asset = RawAssets[i];
+		FAssetData& Asset = NewAssets[i].Data;
 
 		if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
 		{
-			if (RawAssets.IsValidIndex(i))
-			{
-				RawAssets.RemoveAt(i);
-				i--;
-			}
+			NewAssets.RemoveAt(i);
+			i--;
 		}
 	}
 
-	TArray<FAssetInfo> NewAssets;
 
-	for(FAssetData Asset : RawAssets)
-	{
-		NewAssets.Add({ Asset, {} });
-	}
 
 	uint16 id = 0;
 	for (TSharedPtr<IAssetAction>& Action : AssetActions)
@@ -175,18 +226,12 @@ void AssetManager::ScanAssets() //TODO perform scan on worker thread
 
 	for (int i = 0; i < NewAssets.Num(); i++)
 	{
-		if (NewAssets[i].ActionResults.Num() == 0) 
+		if (NewAssets[i].ActionResults.Num() == 0)
 		{
 			NewAssets.RemoveAt(i);
 			i--;
 		}
 	}
-
-	AssetLock.Lock();
-	Assets = NewAssets;
-	AssetLock.Unlock();
-	
-	OnAssetListUpdated.ExecuteIfBound();
 }
 
 AssetManager* AssetManager::Get()
