@@ -1,4 +1,4 @@
-#include "AssetManagement.h"
+#include "AssetManagementModule.h"
 #include "LevelEditor.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "AssetManagementWidget.h"
@@ -31,10 +31,16 @@ void FAssetManagementModule::StartupModule()
 	MainMenuExtender = MakeShareable(new FExtender);
 	MainMenuExtender->AddMenuBarExtension("Window", EExtensionHook::After, AssetManagementCommands::menu_commands, FMenuBarExtensionDelegate::CreateStatic(&AssetManagementCommands::BuildMenu));
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MainMenuExtender);
+
+	manager = MakeShareable(new AssetManager());
+	manager->Create();
 }
 
 void FAssetManagementModule::ShutdownModule()
 {
+	manager->Destroy();
+	manager.Reset();
+	
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	TSharedPtr<FTabManager> tab_manager = LevelEditorModule.GetLevelEditorTabManager();
 

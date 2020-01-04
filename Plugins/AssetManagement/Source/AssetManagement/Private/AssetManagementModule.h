@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
+#include "AssetMagementCore.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(AssetManagementLog, Log, All);
 
@@ -13,4 +14,5 @@ public:
 
 private:
 	TSharedPtr<FExtender> MainMenuExtender;
+	TSharedPtr<AssetManager> manager;
 };

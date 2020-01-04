@@ -1,5 +1,4 @@
 #include "ExtendedWidget.h"
-#include "AssetManagement.h"
 
 void SExtendedWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {

@@ -1,13 +1,10 @@
 #include "AssetManagementWidget.h"
-#include "AssetManagement.h"
+#include "AssetManagementModule.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SScrollBox.h"
 #include "Widgets/Input/SButton.h"
-#include "Widgets/Input/SSearchBox.h"
-#include "Widgets/Input/SEditableTextBox.h"
 #include "Widgets/Input/SNumericEntryBox.h"
-#include "Widgets/Input/SCheckBox.h"
 #include "Async/Async.h"
 #include "EditorStyle.h"
 #include "AssetRegistryModule.h"
@@ -75,51 +72,17 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 
 void SWidgetAssetManagement::Start()
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
-		TEXT("AssetRegistry"));
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-
-	if (AssetRegistry.IsLoadingAssets())
-	{
-		AssetRegistry.OnFilesLoaded().AddSP(this, &SWidgetAssetManagement::BindToAssetRegistry);
-	}
-	else
-	{
-		BindToAssetRegistry();
-	}
-}
-
-void SWidgetAssetManagement::BindToAssetRegistry()
-{
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(
-		TEXT("AssetRegistry"));
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-
-	AssetRegistry.OnAssetAdded().AddSP(this, &SWidgetAssetManagement::OnAssetAdded);
-	AssetRegistry.OnAssetRemoved().AddSP(this, &SWidgetAssetManagement::OnAssetUpdated);
-	AssetRegistry.OnAssetRemoved().AddSP(this, &SWidgetAssetManagement::OnAssetRemoved);
-	AssetRegistry.OnAssetRenamed().AddSP(this, &SWidgetAssetManagement::OnAssetRenamed);
-}
-
-void SWidgetAssetManagement::OnAssetAdded(const FAssetData&)
-{
-}
-
-void SWidgetAssetManagement::OnAssetUpdated(const FAssetData&)
-{
-}
-
-void SWidgetAssetManagement::OnAssetRemoved(const FAssetData&)
-{
-}
-
-void SWidgetAssetManagement::OnAssetRenamed(const FAssetData&, const FString&)
-{
+	PopulateAssets();
+	AssetManager::OnAssetListUpdated.BindSP(this, &SWidgetAssetManagement::PopulateAssets);
 }
 
 FReply SWidgetAssetManagement::RequestRescan()
 {
-	PopulateAssets();
+	AssetManager* manager = AssetManager::Get();
+	if (manager != nullptr)
+	{
+		manager->Get()->RequestRescan();
+	}
 
 	return FReply::Handled();
 }
@@ -130,96 +93,12 @@ void SWidgetAssetManagement::PopulateAssets()
 		TEXT("AssetRegistry"));
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
-	Assets.Empty();
-	bool res = AssetRegistry.GetAllAssets(Assets, true);
-
-	TArray<FAssetData> Worlds;
-	res = AssetRegistry.GetAssetsByClass(UWorld::StaticClass()->GetFName(), Worlds, true);
-
-	for (int32 i = 0; i < Worlds.Num(); i++)
+	TArray<FAssetInfo> Assets;
+	AssetManager* manager = AssetManager::Get();
+	if (manager != nullptr)
 	{
-		FAssetData& Asset = Worlds[i];
-
-		if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
-		{
-			if (Worlds.IsValidIndex(i))
-			{
-				Worlds.RemoveAt(i);
-				i--;
-			}
-		}
+		Assets = manager->Get()->GetAssets();
 	}
-
-	for (int32 i = 0; i < Assets.Num(); i++)
-	{
-		FAssetData& Asset = Assets[i];
-
-		if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
-		{
-			if (Assets.IsValidIndex(i))
-			{
-				Assets.RemoveAt(i);
-				i--;
-			}
-		}
-	}
-
-	TMap<FAssetData, uint16> References;
-
-	for (FAssetData& World : Worlds)
-	{
-		TArray<FAssetData> ToSearch = {World};
-		TArray<FAssetData> Searched;
-
-		while (ToSearch.Num() > 0)
-		{
-			FAssetData Asset = ToSearch[0];
-			ToSearch.RemoveAt(0);
-			Searched.Add(Asset);
-
-			if (!References.Contains(Asset))
-			{
-				References.Add(Asset, 1);
-			}
-			else
-			{
-				References[Asset]++;
-			}
-
-			TArray<FName> Dependencies;
-			res = AssetRegistry.GetDependencies(Asset.PackageName, Dependencies);
-
-			for (FName& Dependency : Dependencies)
-			{
-				for (FAssetData& Link : Assets)
-				{
-					if (Link.PackageName.IsEqual(Dependency))
-					{
-						if (!Searched.Contains(Link) && !ToSearch.Contains(Link))
-						{
-							ToSearch.Add(Link);
-						}
-
-						break;
-					}
-				}
-			}
-		}
-	}
-
-
-	Assets.Sort([References](const FAssetData& A, const FAssetData& B)
-	{
-		uint16 a_ref, b_ref;
-		a_ref = 0;
-		b_ref = 0;
-
-		if (References.Contains(A)) a_ref = References[A];
-		if (References.Contains(B)) b_ref = References[B];
-
-		return a_ref < b_ref;
-	});
-
 
 	int difference = Assets.Num() - asset_list.Get()->GetChildren()->Num();
 	int pre_count = asset_list.Get()->GetChildren()->Num();
@@ -232,65 +111,65 @@ void SWidgetAssetManagement::PopulateAssets()
 
 			SVerticalBox::FSlot& slot = asset_list->AddSlot();
 			slot
-			[
-				SNew(SHorizontalBox)
-				+ SHorizontalBox::Slot()
-				  .FillWidth(1)
-				  .VAlign(EVerticalAlignment::VAlign_Center)
+				[
+					SNew(SHorizontalBox)
+					+ SHorizontalBox::Slot()
+				.FillWidth(1)
+				.VAlign(EVerticalAlignment::VAlign_Center)
 				[
 					SNew(STextBlock)
 					.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
-					.Clipping(EWidgetClipping::ClipToBounds)
+				.Clipping(EWidgetClipping::ClipToBounds)
 				]
 
-				+ SHorizontalBox::Slot()
-				  .AutoWidth()
-				  .Padding(2)
-				  .VAlign(EVerticalAlignment::VAlign_Center)
+			+ SHorizontalBox::Slot()
+				.AutoWidth()
+				.Padding(2)
+				.VAlign(EVerticalAlignment::VAlign_Center)
 				[
 					SNew(SBox)
 					.WidthOverride(20)
-					.HeightOverride(20)
-					[
-						SNew(SButton)
-						.ForegroundColor(FSlateColor(FLinearColor(0, 0, 0, 0)))
-						.ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
-						.ContentPadding(4.0f)
-						.ForegroundColor(FSlateColor::UseForeground())
-						[
-							SNew(SImage)
-							.Image(FEditorStyle::GetBrush("PropertyWindow.Button_Browse"))
-							.ColorAndOpacity(FSlateColor::UseForeground())
-						]
-					]
+				.HeightOverride(20)
+				[
+					SNew(SButton)
+					.ForegroundColor(FSlateColor(FLinearColor(0, 0, 0, 0)))
+				.ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
+				.ContentPadding(4.0f)
+				.ForegroundColor(FSlateColor::UseForeground())
+				[
+					SNew(SImage)
+					.Image(FEditorStyle::GetBrush("PropertyWindow.Button_Browse"))
+				.ColorAndOpacity(FSlateColor::UseForeground())
+				]
+				]
 				]
 
-				+ SHorizontalBox::Slot()
+			+ SHorizontalBox::Slot()
 				.AutoWidth()
 				[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
-					.Padding(2)
-					[
-						SNew(SButton)
-						.ToolTip(SNew(SActionToolTip))
-					]
-
-					+ SHorizontalBox::Slot()
-					.Padding(2)
-					[
-						SNew(SButton)
-						.ToolTip(SNew(SActionToolTip))
-					]
-
-					+ SHorizontalBox::Slot()
-					.Padding(2)
-					[
-						SNew(SButton)
-						.ToolTip(SNew(SActionToolTip))
-					]
+				.Padding(2)
+				[
+					SNew(SButton)
+					.ToolTip(SNew(SActionToolTip))
 				]
-			];
+
+			+ SHorizontalBox::Slot()
+				.Padding(2)
+				[
+					SNew(SButton)
+					.ToolTip(SNew(SActionToolTip))
+				]
+
+			+ SHorizontalBox::Slot()
+				.Padding(2)
+				[
+					SNew(SButton)
+					.ToolTip(SNew(SActionToolTip))
+				]
+				]
+				];
 
 			slot.Padding(FMargin(4));
 		}
@@ -307,13 +186,13 @@ void SWidgetAssetManagement::PopulateAssets()
 	for (int i = 0; i < asset_list.Get()->GetChildren()->Num(); i++)
 	{
 		SHorizontalBox* container = static_cast<SHorizontalBox*>(&asset_list.Get()->GetChildren()->GetChildAt(i).Get());
-		
+
 		TSharedRef<STextBlock> name_label = StaticCastSharedRef<STextBlock>(container->GetChildren()->GetChildAt(0));
 		TSharedRef<SBox> browse_button_container = StaticCastSharedRef<SBox>(container->GetChildren()->GetChildAt(1));
 		TSharedRef<SHorizontalBox> button_container = StaticCastSharedRef<SHorizontalBox>(container->GetChildren()->GetChildAt(2));
-		
+
 		TSharedRef<SButton> browse_button = StaticCastSharedRef<SButton>(browse_button_container->GetChildren()->GetChildAt(0));
-		
+
 
 		for (int j = 0; j < 3; j++)
 		{
@@ -328,7 +207,7 @@ void SWidgetAssetManagement::PopulateAssets()
 			else if (j == 1)
 			{
 				tooltip->SetHeading("Improper naming");
-				tooltip->SetContent("The name of this asset does not follow the defined format.\nSuggested asset name: " + Assets[i].AssetName.ToString() + ".\n\nClick to apply naming");
+				tooltip->SetContent("The name of this asset does not follow the defined format.\nSuggested asset name: " + Assets[i].Data.AssetName.ToString() + ".\n\nClick to apply naming");
 			}
 			else if (j == 2)
 			{
@@ -337,23 +216,17 @@ void SWidgetAssetManagement::PopulateAssets()
 			}
 		}
 
-		name_label->SetText(FText::FromString(Assets[i].AssetName.ToString()));
-		name_label->SetToolTipText(FText::FromString(Assets[i].PackageName.ToString()));
+		name_label->SetText(FText::FromString(Assets[i].Data.AssetName.ToString()));
+		name_label->SetToolTipText(FText::FromString(Assets[i].Data.PackageName.ToString()));
 
-		FAssetData target = Assets[i];
+		FAssetData target = Assets[i].Data;
 		browse_button->SetOnClicked(FOnClicked::CreateLambda([target]()
 		{
 			TArray<FAssetData> AssetDataList;
 			AssetDataList.Add(target);
 			GEditor->SyncBrowserToObjects(AssetDataList);
-			
+
 			return FReply::Handled();
 		}));
-
-		uint16 refCount = 0;
-		if (References.Contains(Assets[i]))
-		{
-			refCount = References[Assets[i]];
-		}
 	}
 }
