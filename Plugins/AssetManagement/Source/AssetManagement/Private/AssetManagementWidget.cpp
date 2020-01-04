@@ -94,10 +94,13 @@ void SWidgetAssetManagement::PopulateAssets()
 	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
 	TArray<FAssetInfo> Assets;
+	TArray<IAssetAction*> AssetActions;
+	
 	AssetManager* manager = AssetManager::Get();
 	if (manager != nullptr)
 	{
-		Assets = manager->Get()->GetAssets();
+		Assets = manager->GetAssets();
+		AssetActions = manager->GetActions();
 	}
 
 	int difference = Assets.Num() - asset_list.Get()->GetChildren()->Num();
@@ -109,9 +112,10 @@ void SWidgetAssetManagement::PopulateAssets()
 		{
 			int index = pre_count + i;
 
+			TSharedPtr<SHorizontalBox> ButtonContainer;
+
 			SVerticalBox::FSlot& slot = asset_list->AddSlot();
-			slot
-				[
+			slot[
 					SNew(SHorizontalBox)
 					+ SHorizontalBox::Slot()
 				.FillWidth(1)
@@ -147,31 +151,22 @@ void SWidgetAssetManagement::PopulateAssets()
 			+ SHorizontalBox::Slot()
 				.AutoWidth()
 				[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
-				.Padding(2)
-				[
-					SNew(SButton)
-					.ToolTip(SNew(SActionToolTip))
-				]
-
-			+ SHorizontalBox::Slot()
-				.Padding(2)
-				[
-					SNew(SButton)
-					.ToolTip(SNew(SActionToolTip))
-				]
-
-			+ SHorizontalBox::Slot()
-				.Padding(2)
-				[
-					SNew(SButton)
-					.ToolTip(SNew(SActionToolTip))
-				]
+					SAssignNew(ButtonContainer, SHorizontalBox)
 				]
 				];
 
 			slot.Padding(FMargin(4));
+
+			for (int j = 0; j < AssetActions.Num(); j++)
+			{
+				SHorizontalBox::FSlot& button_slot = ButtonContainer->AddSlot();
+				button_slot.Padding(2);
+				
+				button_slot[
+					SNew(SButton)
+					.ToolTip(SNew(SActionToolTip))
+				];
+			}
 		}
 	}
 	else if (difference < 0)
@@ -193,27 +188,20 @@ void SWidgetAssetManagement::PopulateAssets()
 
 		TSharedRef<SButton> browse_button = StaticCastSharedRef<SButton>(browse_button_container->GetChildren()->GetChildAt(0));
 
-
-		for (int j = 0; j < 3; j++)
+		for (int j = 0; j < AssetActions.Num(); j++)
 		{
 			TSharedRef<SButton> button = StaticCastSharedRef<SButton>(button_container->GetChildren()->GetChildAt(j));
 			TSharedPtr<SActionToolTip> tooltip = StaticCastSharedPtr<SActionToolTip>(button->GetToolTip());
 
-			if (j == 0)
-			{
-				tooltip->SetHeading("Unused asset");
-				tooltip->SetContent("This asset is not used by a playable level.\n\nClick to delete");
-			}
-			else if (j == 1)
-			{
-				tooltip->SetHeading("Improper naming");
-				tooltip->SetContent("The name of this asset does not follow the defined format.\nSuggested asset name: " + Assets[i].Data.AssetName.ToString() + ".\n\nClick to apply naming");
-			}
-			else if (j == 2)
-			{
-				tooltip->SetHeading("Redirector");
-				tooltip->SetContent("This asset redirects it's reference to another asset.\n\nClick to fix redirection");
-			}
+			bool enable = Assets[i].ActionResults.Contains(j);
+			button->SetEnabled(enable);
+
+			FString TooltipContent = AssetActions[j]->GetTooltipContent();
+			if(enable) TooltipContent = TooltipContent.Replace(TEXT("{Asset}"), *Assets[i].ActionResults[j]);
+			else TooltipContent = "";
+
+			tooltip->SetHeading(AssetActions[j]->GetTooltipHeading());
+			tooltip->SetContent(TooltipContent);
 		}
 
 		name_label->SetText(FText::FromString(Assets[i].Data.AssetName.ToString()));
