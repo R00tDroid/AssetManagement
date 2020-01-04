@@ -49,7 +49,7 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 				  .VAlign(VAlign_Center)
 				[
 					SNew(STextBlock)
-					.Font(FCoreStyle::GetDefaultFontStyle("Regular", 10))
+					.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 10))
 				]
 
 				+ SHorizontalBox::Slot()
@@ -61,7 +61,7 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 					.VAlign(VAlign_Fill)
 					[
 						SNew(STextBlock)
-						.Font(FCoreStyle::GetDefaultFontStyle("Regular", 12))
+						.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 12))
 						.Text(FText::FromString("Rescan"))
 					]
 				]
@@ -122,7 +122,7 @@ void SWidgetAssetManagement::PopulateAssets()
 				.VAlign(EVerticalAlignment::VAlign_Center)
 				[
 					SNew(STextBlock)
-					.Font(FCoreStyle::GetDefaultFontStyle("Regular", 8))
+					.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 8))
 				.Clipping(EWidgetClipping::ClipToBounds)
 				]
 

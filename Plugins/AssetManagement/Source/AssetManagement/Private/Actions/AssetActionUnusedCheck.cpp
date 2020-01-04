@@ -10,7 +10,7 @@ void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 	TArray<FAssetData> Worlds;
 	AssetRegistry.GetAssetsByClass(UWorld::StaticClass()->GetFName(), Worlds, true);
 	
-	TMap<FAssetData, uint16> References;
+	TMap<FName, uint16> References;
 
 	for (FAssetData& World : Worlds)
 	{
@@ -23,13 +23,13 @@ void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 			ToSearch.RemoveAt(0);
 			Searched.Add(Asset);
 
-			if (!References.Contains(Asset))
+			if (!References.Contains(Asset.PackageName))
 			{
-				References.Add(Asset, 1);
+				References.Add(Asset.PackageName, 1);
 			}
 			else
 			{
-				References[Asset]++;
+				References[Asset.PackageName]++;
 			}
 
 			TArray<FName> Dependencies;
@@ -55,7 +55,7 @@ void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 
 	for (FAssetInfo& Asset : Assets)
 	{
-		if(!References.Contains(Asset.Data))
+		if(!References.Contains(Asset.Data.PackageName))
 		{
 			Asset.ActionResults.Add(AssignedId, "");
 		}

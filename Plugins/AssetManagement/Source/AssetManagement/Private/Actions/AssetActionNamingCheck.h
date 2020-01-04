@@ -1,5 +1,5 @@
 #pragma once
-#include "AssetAction.h"
+#include "../AssetAction.h"
 
 class AssetActionNamingCheck: public IAssetAction
 {

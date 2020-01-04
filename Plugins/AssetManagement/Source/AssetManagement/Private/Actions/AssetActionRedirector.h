@@ -1,5 +1,5 @@
 #pragma once
-#include "AssetAction.h"
+#include "../AssetAction.h"
 
 class AssetActionRedirector: public IAssetAction
 {
