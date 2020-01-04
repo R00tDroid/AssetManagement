@@ -4,6 +4,9 @@
 #include "Actions/AssetActionUnusedCheck.h"
 #include "Actions/AssetActionRedirector.h"
 #include "Actions/AssetActionNamingCheck.h"
+#include "NotificationManager.h"
+#include "Editor.h"
+#include "Widgets/Notifications/SNotificationList.h"
 
 AssetManager* instance_ = nullptr;
 
@@ -100,6 +103,17 @@ void AssetManager::BindToAssetRegistry()
 
 void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> Assets)
 {
+	UEditorEngine* Editor = GEditor;
+	FWorldContext* PIEWorldContext = GEditor->GetPIEWorldContext();
+	if (PIEWorldContext)
+	{
+		FNotificationInfo Notification(FText::FromString("Can not modify assets while Play In Editor is active"));
+		Notification.ExpireDuration = 3.0f;
+		FSlateNotificationManager::Get().AddNotification(Notification);
+
+		return;
+	}
+	
 	if(AssetActions.IsValidIndex(ActionId))
 	{
 		AssetActions[ActionId]->ExecuteAction(Assets);
