@@ -1,5 +1,6 @@
 #include "AssetActionUnusedCheck.h"
 #include "AssetRegistryModule.h"
+#include "ObjectTools.h"
 
 void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 AssignedId)
 {
@@ -62,6 +63,6 @@ void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 }
 
 void AssetActionUnusedCheck::ExecuteAction(TArray<FAssetData> Assets)
-{
-	//TODO implement asset deletion
+{	
+	if (Assets.Num() > 0) ObjectTools::DeleteAssets(Assets, true);
 }
