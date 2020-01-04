@@ -212,6 +212,16 @@ void AssetManager::ProcessAssets(TArray<FAssetInfo>& NewAssets)
 		{
 			NewAssets.RemoveAt(i);
 			i--;
+			continue;
+		}
+
+		FString asset_name = FPaths::GetBaseFilename(Asset.PackageName.ToString());
+		
+		if(!Asset.AssetName.ToString().Equals(asset_name))
+		{
+			NewAssets.RemoveAt(i);
+			i--;
+			continue;
 		}
 	}
 
