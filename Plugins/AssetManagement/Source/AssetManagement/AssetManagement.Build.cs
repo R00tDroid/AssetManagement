@@ -22,7 +22,8 @@ public class AssetManagement : ModuleRules
 				"Slate",
 				"SlateCore",
 			    "UnrealEd",
-                "EditorStyle"
+                "EditorStyle",
+                "UMGEditor"
             }
 			);
 	}
