@@ -98,6 +98,14 @@ void AssetManager::BindToAssetRegistry()
 	ScanAssets();
 }
 
+void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> Assets)
+{
+	if(AssetActions.IsValidIndex(ActionId))
+	{
+		AssetActions[ActionId]->ExecuteAction(Assets);
+	}
+}
+
 void AssetManager::ScanAssets() //TODO perform scan on worker thread
 {
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));

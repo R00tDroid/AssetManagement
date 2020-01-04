@@ -202,6 +202,15 @@ void SWidgetAssetManagement::PopulateAssets()
 
 			tooltip->SetHeading(AssetActions[j]->GetTooltipHeading());
 			tooltip->SetContent(TooltipContent);
+
+			FAssetData target = Assets[i].Data;
+			int ActionId = j;
+			button->SetOnClicked(FOnClicked::CreateLambda([ActionId, target]()
+			{
+				AssetManager* manager = AssetManager::Get();
+				if (manager != nullptr) manager->RequestActionExecution(ActionId, { target });
+				return FReply::Handled();
+			}));
 		}
 
 		name_label->SetText(FText::FromString(Assets[i].Data.AssetName.ToString()));

@@ -24,6 +24,8 @@ public:
 
 	void BindToAssetRegistry();
 
+	void RequestActionExecution(int ActionId, TArray<FAssetData> Assets);
+
 private:
 	void ScanAssets();
 
