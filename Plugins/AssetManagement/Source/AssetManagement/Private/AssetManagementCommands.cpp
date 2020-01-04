@@ -33,7 +33,7 @@ void AssetManagementCommands::BindCommands()
 
 void AssetManagementCommands::BuildMenu(FMenuBarBuilder& MenuBuilder)
 {
-	MenuBuilder.AddPullDownMenu(LOCTEXT("", "Asset Tools"), LOCTEXT("", "Open analytics tools"), FNewMenuDelegate::CreateStatic(&AssetManagementCommands::MakeMenu), "Asset Tools");
+	MenuBuilder.AddPullDownMenu(LOCTEXT("", "Asset Tools"), LOCTEXT("", "Open asset tools"), FNewMenuDelegate::CreateStatic(&AssetManagementCommands::MakeMenu), "Asset Tools");
 }
 
 void AssetManagementCommands::MakeMenu(FMenuBuilder& MenuBuilder)
