@@ -82,11 +82,11 @@ void AssetManager::OnAssetAdded(const FAssetData& Asset)
 	AssetLock.Unlock();
 	if (found) return;
 	
-	//TODO execute on seperate thread
-	TArray<FAssetInfo> NewAssets = { {Asset, {}} };
+	//TODO execute on separate thread
+	TArray<FAssetInfo> NewAssets = {{Asset, {}}};
 	ProcessAssets(NewAssets);
 
-	if (NewAssets.Num() > 0) 
+	if (NewAssets.Num() > 0)
 	{
 		AssetLock.Lock();
 		for (FAssetInfo& info : NewAssets)
