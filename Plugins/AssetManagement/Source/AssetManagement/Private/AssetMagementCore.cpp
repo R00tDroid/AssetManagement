@@ -3,6 +3,7 @@
 #include "AssetRegistryModule.h"
 #include "Actions/AssetActionUnusedCheck.h"
 #include "Actions/AssetActionRedirector.h"
+#include "Actions/AssetActionNamingCheck.h"
 
 AssetManager* instance_ = nullptr;
 
@@ -14,6 +15,7 @@ void AssetManager::Create()
 	instance_ = this;
 
 	AssetActions.Add(MakeShareable(new AssetActionUnusedCheck()));
+	AssetActions.Add(MakeShareable(new AssetActionNamingCheck()));
 	AssetActions.Add(MakeShareable(new AssetActionRedirector()));
 	
 	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
