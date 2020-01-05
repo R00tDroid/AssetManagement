@@ -64,5 +64,5 @@ void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 
 void AssetActionUnusedCheck::ExecuteAction(TArray<FAssetData> Assets)
 {	
-	if (Assets.Num() > 0) ObjectTools::DeleteAssets(Assets, true);
+	if (Assets.Num() > 0) ObjectTools::DeleteAssets(Assets, false); //TODO add confirmation toggle to config
 }
