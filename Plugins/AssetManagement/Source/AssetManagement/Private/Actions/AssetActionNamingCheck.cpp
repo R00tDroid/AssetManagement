@@ -9,6 +9,9 @@
 #include "WidgetBlueprint.h"
 #include "Engine/UserDefinedEnum.h"
 #include "Engine/UserDefinedStruct.h"
+#include "AssetToolsModule.h"
+#include "ISourceControlModule.h"
+#include "FileHelpers.h"
 
 
 AssetActionNamingCheck::AssetActionNamingCheck()
@@ -51,6 +54,8 @@ void AssetActionNamingCheck::ExecuteAction(TArray<FAssetData> Assets)
 
 		if (!name.Equals(suggested_name))
 		{
+			TArray<UPackage*> FilesToSave;
+			
 			TSet<UPackage*> ObjectsUserRefusedToFullyLoad;
 			FText ErrorMessage;
 
@@ -59,30 +64,51 @@ void AssetActionNamingCheck::ExecuteAction(TArray<FAssetData> Assets)
 			PGN.GroupName = TEXT("");
 			PGN.PackageName = Asset.PackagePath.ToString() / suggested_name;
 
-			UPackage* OldPackage = Asset.GetAsset()->GetOutermost();
+			UObject* Object = Asset.GetAsset();
+			UPackage* OldPackage = Object->GetOutermost();
 
-			bool rooted = false;
+			bool WasRooted = false;
 			if(!OldPackage->IsRooted())
 			{
 				OldPackage->AddToRoot();
-				rooted = true;
+				WasRooted = true;
 			}
 			
-			bool result = ObjectTools::RenameSingleObject(Asset.GetAsset(), PGN, ObjectsUserRefusedToFullyLoad, ErrorMessage, {}, false);
+			bool Result = ObjectTools::RenameSingleObject(Object, PGN, ObjectsUserRefusedToFullyLoad, ErrorMessage, nullptr, true);
 
-			if(!result)
+			if(!Result)
 			{
 				FNotificationInfo Notification(ErrorMessage);
 				Notification.ExpireDuration = 3.0f;
 				FSlateNotificationManager::Get().AddNotification(Notification);
 			}
+			else
+			{
+				FilesToSave.Add(Object->GetOutermost());
+				FilesToSave.Add(OldPackage);
+			}
 
-			if (rooted)
+			if (WasRooted)
 			{
 				OldPackage->RemoveFromRoot();
 			}
 
-			if(result) ObjectTools::CleanupAfterSuccessfulDelete({ OldPackage });
+			if (FilesToSave.Num() > 0)
+			{
+				FEditorFileUtils::PromptForCheckoutAndSave(FilesToSave, false, false, nullptr, true);
+				ISourceControlModule::Get().QueueStatusUpdate(FilesToSave);
+			}
+
+			if (Result)
+			{
+				UObjectRedirector* Redirector = LoadObject<UObjectRedirector>(UObjectRedirector::StaticClass(), *Asset.PackageName.ToString());
+
+				if (Redirector != nullptr)
+				{
+					FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+					AssetToolsModule.Get().FixupReferencers({ Redirector });
+				}
+			}
 		}
 	}
 }
