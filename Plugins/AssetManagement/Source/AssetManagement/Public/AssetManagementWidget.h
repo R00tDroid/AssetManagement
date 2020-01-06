@@ -24,6 +24,7 @@ private:
 
 	void PopulateAssets();
 	TSharedPtr<SVerticalBox> asset_list;
+	TArray<int> FilteredActions;
 };
 
 

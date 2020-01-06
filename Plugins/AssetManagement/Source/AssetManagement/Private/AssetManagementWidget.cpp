@@ -9,11 +9,12 @@
 #include "EditorStyle.h"
 #include "AssetRegistryModule.h"
 #include "IAssetRegistry.h"
-#include "Engine/World.h"
 #include "Editor.h"
 
 void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 {
+	TSharedPtr<SGridPanel> FilterGrid;
+	
 	ChildSlot
 	[
 		SNew(SBorder)
@@ -44,13 +45,17 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 			[
 				SNew(SHorizontalBox)
 				+ SHorizontalBox::Slot()
-				  .FillWidth(1.0f)
-				  .Padding(FMargin(5.0f))
-				  .VAlign(VAlign_Center)
+				.AutoWidth()
+				.Padding(FMargin(5.0f))
+				.VAlign(VAlign_Center)
 				[
-					SNew(STextBlock)
-					.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 10))
+					SAssignNew(FilterGrid, SGridPanel)
 				]
+
+				+ SHorizontalBox::Slot()
+				.FillWidth(1.0f)
+				.Padding(FMargin(5.0f))
+				.VAlign(VAlign_Center)
 
 				+ SHorizontalBox::Slot()
 				  .AutoWidth()
@@ -58,7 +63,7 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 				[
 					SNew(SButton)
 					.OnClicked(FOnClicked::CreateSP(this, &SWidgetAssetManagement::RequestRescan))
-					.VAlign(VAlign_Fill)
+					.VAlign(VAlign_Center)
 					[
 						SNew(STextBlock)
 						.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 12))
@@ -68,6 +73,53 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 			]
 		]
 	];
+
+	TArray<IAssetAction*> AssetActions;
+
+	AssetManager* manager = AssetManager::Get();
+	if (manager != nullptr)
+	{
+		AssetActions = manager->GetActions();
+	}
+
+	for (int i = 0; i < AssetActions.Num(); i++)
+	{
+		FilteredActions.Add(i);
+		
+		SGridPanel::FSlot& checkbox_slot = FilterGrid->AddSlot(0, i);
+		checkbox_slot.VAlign(EVerticalAlignment::VAlign_Center);
+
+		SGridPanel::FSlot& name_slot = FilterGrid->AddSlot(1, i);
+		name_slot.VAlign(EVerticalAlignment::VAlign_Center);
+
+		checkbox_slot
+		[
+			SNew(SCheckBox)
+			.OnCheckStateChanged_Lambda([this, i](ECheckBoxState Checked)
+			{
+				if(Checked == ECheckBoxState::Checked)
+				{
+					this->FilteredActions.AddUnique(i);
+					this->PopulateAssets();
+				}
+			else
+				{
+					this->FilteredActions.Remove(i);
+					this->PopulateAssets();
+				}
+			})
+		];
+
+		name_slot
+		[
+			SNew(STextBlock)
+			.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 8))
+			.Text(FText::FromString(AssetActions[i]->GetFilterName()))
+		];
+
+		TSharedRef<SCheckBox> checkbox = StaticCastSharedRef<SCheckBox>(checkbox_slot.GetWidget());
+		checkbox->SetIsChecked(ECheckBoxState::Checked);
+	}
 }
 
 void SWidgetAssetManagement::Start()
@@ -103,6 +155,27 @@ void SWidgetAssetManagement::PopulateAssets()
 		AssetActions = manager->GetActions();
 	}
 
+	for (int i = 0; i < Assets.Num(); i++)
+	{
+		TArray<uint16> ActionIndices;
+		Assets[i].ActionResults.GetKeys(ActionIndices);
+		bool ShouldDisplay = false;
+		for(uint16 Index : ActionIndices)
+		{
+			if(FilteredActions.Contains(Index))
+			{
+				ShouldDisplay = true;
+				break;
+			}
+		}
+
+		if(!ShouldDisplay)
+		{
+			Assets.RemoveAt(i);
+			i--;
+		}
+	}
+
 	int difference = Assets.Num() - asset_list.Get()->GetChildren()->Num();
 	int pre_count = asset_list.Get()->GetChildren()->Num();
 
@@ -115,18 +188,19 @@ void SWidgetAssetManagement::PopulateAssets()
 			TSharedPtr<SHorizontalBox> ButtonContainer;
 
 			SVerticalBox::FSlot& slot = asset_list->AddSlot();
-			slot[
-					SNew(SHorizontalBox)
-					+ SHorizontalBox::Slot()
+			slot
+			[
+				SNew(SHorizontalBox)
+				+ SHorizontalBox::Slot()
 				.FillWidth(1)
 				.VAlign(EVerticalAlignment::VAlign_Center)
 				[
 					SNew(STextBlock)
 					.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 8))
-				.Clipping(EWidgetClipping::ClipToBounds)
+					.Clipping(EWidgetClipping::ClipToBounds)
 				]
 
-			+ SHorizontalBox::Slot()
+				+ SHorizontalBox::Slot()
 				.AutoWidth()
 				.Padding(2)
 				.VAlign(EVerticalAlignment::VAlign_Center)
@@ -148,7 +222,7 @@ void SWidgetAssetManagement::PopulateAssets()
 				]
 				]
 
-			+ SHorizontalBox::Slot()
+				+ SHorizontalBox::Slot()
 				.AutoWidth()
 				[
 					SAssignNew(ButtonContainer, SHorizontalBox)

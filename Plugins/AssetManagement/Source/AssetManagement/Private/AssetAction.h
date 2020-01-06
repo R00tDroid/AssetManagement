@@ -14,6 +14,8 @@ public:
 
 	virtual void ExecuteAction(TArray<FAssetData> Assets) = 0;
 
-	virtual FString GetTooltipHeading() = 0;;
+	virtual FString GetTooltipHeading() = 0;
 	virtual FString GetTooltipContent() = 0; //Use {Asset} for asset specific data
+
+	virtual FString GetFilterName() = 0;
 };
