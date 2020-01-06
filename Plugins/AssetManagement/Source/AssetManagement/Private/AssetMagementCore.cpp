@@ -93,6 +93,7 @@ void AssetManager::OnAssetAdded(const FAssetData& Asset)
 		{
 			Assets.Add(info);
 		}
+		PrepareAssetList();
 		AssetLock.Unlock();
 		OnAssetListUpdated.ExecuteIfBound();
 	}
@@ -121,6 +122,7 @@ void AssetManager::OnAssetRemoved(const FAssetData& Asset)
 			changed = true;
 		}
 	}
+	if (changed) PrepareAssetList();
 	AssetLock.Unlock();
 	
 	if(changed) OnAssetListUpdated.ExecuteIfBound();
@@ -177,6 +179,7 @@ void AssetManager::ScanAssets() //TODO perform scan on worker thread
 
 	AssetLock.Lock();
 	Assets = NewAssets;
+	PrepareAssetList();
 	AssetLock.Unlock();
 	
 	OnAssetListUpdated.ExecuteIfBound();
@@ -242,6 +245,14 @@ void AssetManager::ProcessAssets(TArray<FAssetInfo>& NewAssets)
 			i--;
 		}
 	}
+}
+
+void AssetManager::PrepareAssetList()
+{
+	Assets.Sort([](const FAssetInfo& A, const FAssetInfo& B)
+	{
+		return A.Data.PackageName < B.Data.PackageName;
+	});
 }
 
 AssetManager* AssetManager::Get()

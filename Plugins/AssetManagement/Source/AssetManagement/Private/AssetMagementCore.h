@@ -29,6 +29,7 @@ public:
 private:
 	void ScanAssets();
 	void ProcessAssets(TArray<FAssetInfo>&);
+	void PrepareAssetList();
 
 	TArray<TSharedPtr<IAssetAction>> AssetActions;
 	
