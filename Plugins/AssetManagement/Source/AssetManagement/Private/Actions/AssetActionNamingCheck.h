@@ -18,6 +18,7 @@ public:
 	FString GetTooltipHeading() override { return "Improper naming"; }
 	FString GetTooltipContent() override { return "The name of this asset does not follow the defined format.\nSuggested asset name: {Asset}.\n\nClick to apply naming"; }
 	FString GetFilterName() override { return "Naming conventions"; }
+	FString GetApplyAllTag() override { return "Apply all naming conventions"; }
 
 private:
 	TArray<NamingPattern> NamingPatterns;

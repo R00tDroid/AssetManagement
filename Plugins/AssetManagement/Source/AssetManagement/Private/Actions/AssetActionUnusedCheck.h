@@ -9,4 +9,5 @@ public:
 	FString GetTooltipHeading() override { return "Unused Asset"; }
 	FString GetTooltipContent() override { return "This asset is not used by a playable level.\n\nClick to delete"; }
 	FString GetFilterName() override { return "Unused assets"; }
+	FString GetApplyAllTag() override { return "Delete all unused assets"; }
 };

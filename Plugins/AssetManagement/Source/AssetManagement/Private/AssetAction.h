@@ -18,4 +18,5 @@ public:
 	virtual FString GetTooltipContent() = 0; //Use {Asset} for asset specific data
 
 	virtual FString GetFilterName() = 0;
+	virtual FString GetApplyAllTag() = 0;
 };

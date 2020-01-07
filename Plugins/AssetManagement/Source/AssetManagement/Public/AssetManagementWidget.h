@@ -21,10 +21,13 @@ public:
 	FReply RequestRescan();
 
 private:
-
 	void PopulateAssets();
+	void ApplyAll(int Index);
+	
 	TSharedPtr<SVerticalBox> asset_list;
 	TArray<int> FilteredActions;
+
+	uint16 MaxAssetsInList = 500;
 };
 
 

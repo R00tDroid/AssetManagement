@@ -119,6 +119,26 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 
 		TSharedRef<SCheckBox> checkbox = StaticCastSharedRef<SCheckBox>(checkbox_slot.GetWidget());
 		checkbox->SetIsChecked(ECheckBoxState::Checked);
+
+
+		SGridPanel::FSlot& apply_all_slot = FilterGrid->AddSlot(2, i);
+		checkbox_slot.VAlign(EVerticalAlignment::VAlign_Fill);
+		apply_all_slot.Padding(10, 0, 0, 0);
+
+		apply_all_slot
+		[
+			SNew(SButton)
+			.OnClicked_Lambda([this, i]()
+			{
+				this->ApplyAll(i);
+				return FReply::Handled();
+			})
+			[
+				SNew(STextBlock)
+				.Font(FSlateFontInfo(FPaths::EngineContentDir() / TEXT("Slate/Fonts/Roboto-Bold.ttf"), 8))
+				.Text(FText::FromString(AssetActions[i]->GetApplyAllTag()))
+			]
+		];
 	}
 }
 
@@ -174,6 +194,11 @@ void SWidgetAssetManagement::PopulateAssets()
 			Assets.RemoveAt(i);
 			i--;
 		}
+	}
+
+	while (Assets.Num() > MaxAssetsInList)
+	{
+		Assets.RemoveAt(Assets.Num() - 1);
 	}
 
 	int difference = Assets.Num() - asset_list.Get()->GetChildren()->Num();
@@ -299,5 +324,30 @@ void SWidgetAssetManagement::PopulateAssets()
 
 			return FReply::Handled();
 		}));
+	}
+}
+
+void SWidgetAssetManagement::ApplyAll(int Index)
+{
+	TArray<FAssetInfo> Assets;
+	TArray<FAssetData> ToApplyFor;
+
+	AssetManager* manager = AssetManager::Get();
+	if (manager != nullptr)
+	{
+		Assets = manager->GetAssets();
+	}
+
+	for (FAssetInfo& Asset : Assets)
+	{
+		if(Asset.ActionResults.Contains(Index))
+		{
+			ToApplyFor.Add(Asset.Data);
+		}
+	}
+
+	if (Assets.Num() > 0)
+	{
+		manager->RequestActionExecution(Index, ToApplyFor);
 	}
 }
