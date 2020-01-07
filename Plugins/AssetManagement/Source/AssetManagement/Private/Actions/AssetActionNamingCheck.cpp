@@ -1,7 +1,7 @@
 #include "AssetActionNamingCheck.h"
 #include "AssetRegistryModule.h"
 #include "ObjectTools.h"
-#include "NotificationManager.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
 
 #include "Materials/Material.h"

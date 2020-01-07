@@ -4,7 +4,7 @@
 #include "Actions/AssetActionUnusedCheck.h"
 #include "Actions/AssetActionRedirector.h"
 #include "Actions/AssetActionNamingCheck.h"
-#include "NotificationManager.h"
+#include "Framework/Notifications/NotificationManager.h"
 #include "Editor.h"
 #include "Widgets/Notifications/SNotificationList.h"
 

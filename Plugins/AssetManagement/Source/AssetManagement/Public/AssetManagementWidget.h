@@ -2,7 +2,7 @@
 #include "ExtendedWidget.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Widgets/SBoxPanel.h"
-#include "SToolTip.h"
+#include "Widgets/SToolTip.h"
 #include "Widgets/Layout/SSeparator.h"
 #include "AssetAction.h"
 
