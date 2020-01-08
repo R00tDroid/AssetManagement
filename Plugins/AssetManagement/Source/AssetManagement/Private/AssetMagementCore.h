@@ -26,6 +26,8 @@ public:
 
 	void RequestActionExecution(int ActionId, TArray<FAssetData> Assets);
 
+	void FixAllRedirectors();
+
 private:
 	void ScanAssets();
 	void ProcessAssets(TArray<FAssetInfo>&);

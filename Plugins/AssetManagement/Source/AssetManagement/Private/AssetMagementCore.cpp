@@ -7,6 +7,7 @@
 #include "Framework/Notifications/NotificationManager.h"
 #include "Editor.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "AssetToolsModule.h"
 
 AssetManager* instance_ = nullptr;
 
@@ -157,6 +158,50 @@ void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> Asset
 	if(AssetActions.IsValidIndex(ActionId))
 	{
 		AssetActions[ActionId]->ExecuteAction(Assets);
+	}
+}
+
+void AssetManager::FixAllRedirectors()
+{
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+
+	FARFilter filter;
+	filter.ClassNames.Add(UObjectRedirector::StaticClass()->GetFName());
+	filter.bRecursivePaths = true;
+	filter.PackagePaths.Add("/Game");
+
+	TArray<FAssetData> Redirectors;
+	AssetRegistry.GetAssets(filter, Redirectors);
+	
+	TArray<UObjectRedirector*> Objects;
+
+	for (int32 i = 0; i < Redirectors.Num(); i++)
+	{
+		FAssetData& Asset = Redirectors[i];
+
+		FString asset_name = FPaths::GetBaseFilename(Asset.PackageName.ToString());
+
+		if (Asset.AssetName.ToString().Equals(asset_name))
+		{
+			Objects.AddUnique((UObjectRedirector*)Asset.GetAsset());
+		}
+	}
+	
+	if(Objects.Num() == 0)
+	{
+		FNotificationInfo Notification(FText::FromString("No redirectors found"));
+		Notification.ExpireDuration = 2.0f;
+		FSlateNotificationManager::Get().AddNotification(Notification);
+	}
+	else 
+	{
+		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+		AssetToolsModule.Get().FixupReferencers(Objects);
+
+		FNotificationInfo Notification(FText::FromString("Fixed " + FString::FromInt(Objects.Num()) +  " redirector(s)"));
+		Notification.ExpireDuration = 2.0f;
+		FSlateNotificationManager::Get().AddNotification(Notification);
 	}
 }
 

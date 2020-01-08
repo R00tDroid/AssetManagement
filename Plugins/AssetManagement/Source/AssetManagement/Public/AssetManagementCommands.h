@@ -25,4 +25,5 @@ public:
 
 private:
 	TSharedPtr<FUICommandInfo> open_assetmanager;
+	TSharedPtr<FUICommandInfo> execute_fixredirectors;
 };
