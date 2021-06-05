@@ -118,6 +118,8 @@ TArray<NamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 	Patterns.Add({ UMaterialInstanceConstant::StaticClass(), "MI_", "" });
 	Patterns.Add({ UMaterial::StaticClass(), "M_", "" });
 
+	Patterns.Add({ UStaticMesh::StaticClass(), "SM_", "" });
+
 	return Patterns;
 }
 
