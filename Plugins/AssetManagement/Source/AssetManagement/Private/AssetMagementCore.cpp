@@ -8,6 +8,7 @@
 #include "Editor.h"
 #include "Widgets/Notifications/SNotificationList.h"
 #include "AssetToolsModule.h"
+#include "AssetMagementConfig.h"
 
 AssetManager* instance_ = nullptr;
 
@@ -17,6 +18,8 @@ void AssetManager::Create()
 {
 	if (instance_ != nullptr) UE_LOG(AssetManagementLog, Fatal, TEXT("AssetManager already started"))
 	instance_ = this;
+
+	AssetManagerConfig::Get().Load();
 
 	AssetActions.Add(MakeShareable(new AssetActionUnusedCheck()));
 	AssetActions.Add(MakeShareable(new AssetActionNamingCheck()));
@@ -144,7 +147,6 @@ void AssetManager::BindToAssetRegistry()
 
 void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> Assets)
 {
-	UEditorEngine* Editor = GEditor;
 	FWorldContext* PIEWorldContext = GEditor->GetPIEWorldContext();
 	if (PIEWorldContext)
 	{
@@ -184,7 +186,7 @@ void AssetManager::FixAllRedirectors()
 
 		if (Asset.AssetName.ToString().Equals(asset_name))
 		{
-			Objects.AddUnique((UObjectRedirector*)Asset.GetAsset());
+			Objects.AddUnique(static_cast<UObjectRedirector*>(Asset.GetAsset()));
 		}
 	}
 	
