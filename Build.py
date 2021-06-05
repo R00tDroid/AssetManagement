@@ -1,5 +1,14 @@
 import os
 import shutil
+import sys
+import subprocess
+
+if not os.path.isdir('.build'):
+	os.mkdir('.build')
+
+orig_stdout = sys.stdout
+f = open('.build\\autobuild.log', 'w')
+sys.stdout = f
 
 versions = ["4.24", "4.22", "4.20", "4.18"]
 
@@ -36,3 +45,8 @@ for version in versions:
 		res_success+=1
 		
 print("Finished building! Success: ", res_success, ", Failure: ", res_error)
+
+sys.stdout = orig_stdout
+f.close()
+
+input("Press Enter to exit...")
