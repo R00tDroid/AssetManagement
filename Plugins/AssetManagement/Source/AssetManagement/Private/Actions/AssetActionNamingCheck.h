@@ -20,6 +20,8 @@ public:
 	FString GetFilterName() override { return "Naming conventions"; }
 	FString GetApplyAllTag() override { return "Apply all naming conventions"; }
 
+	static TArray<NamingPattern> GetDefaultPatterns();
+
 private:
 	TArray<NamingPattern> NamingPatterns;
 

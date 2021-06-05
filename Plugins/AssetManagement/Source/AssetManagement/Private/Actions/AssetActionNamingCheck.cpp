@@ -16,14 +16,7 @@
 
 AssetActionNamingCheck::AssetActionNamingCheck()
 {
-	NamingPatterns.Empty();
-	NamingPatterns.Add({ UWidgetBlueprint::StaticClass(), "WBP_", "" });
-	
-	NamingPatterns.Add({ UUserDefinedStruct::StaticClass(), "F", "" });
-	NamingPatterns.Add({ UUserDefinedEnum::StaticClass(), "E", "" });
-
-	NamingPatterns.Add({ UMaterialInstanceConstant::StaticClass(), "MI_", "" });
-	NamingPatterns.Add({ UMaterial::StaticClass(), "M_", "" });
+	NamingPatterns = GetDefaultPatterns();
 
 	NamingPatterns.Sort([](const NamingPattern& A, const NamingPattern& B)
 	{
@@ -111,6 +104,21 @@ void AssetActionNamingCheck::ExecuteAction(TArray<FAssetData> Assets)
 			}
 		}
 	}
+}
+
+TArray<NamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
+{
+	TArray<NamingPattern> Patterns;
+	
+	Patterns.Add({ UWidgetBlueprint::StaticClass(), "WBP_", "" });
+
+	Patterns.Add({ UUserDefinedStruct::StaticClass(), "F", "" });
+	Patterns.Add({ UUserDefinedEnum::StaticClass(), "E", "" });
+
+	Patterns.Add({ UMaterialInstanceConstant::StaticClass(), "MI_", "" });
+	Patterns.Add({ UMaterial::StaticClass(), "M_", "" });
+
+	return Patterns;
 }
 
 FString AssetActionNamingCheck::GetNameForAsset(FString Name, UClass* Class)
