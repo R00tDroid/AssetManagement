@@ -10,9 +10,12 @@
 #include "AssetRegistryModule.h"
 #include "IAssetRegistry.h"
 #include "Editor.h"
+#include "AssetMagementConfig.h"
 
 void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 {
+	MaxAssetsInList = AssetManagerConfig::Get().GetInt("UI", "AssetListLimit", 200);
+	
 	TSharedPtr<SGridPanel> FilterGrid;
 	
 	ChildSlot
