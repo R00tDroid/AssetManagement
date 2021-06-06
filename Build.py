@@ -10,7 +10,7 @@ orig_stdout = sys.stdout
 f = open('.build\\autobuild.log', 'w')
 sys.stdout = f
 
-versions = ["4.24", "4.22", "4.20", "4.18"]
+versions = ["5.0ea", "4.26", "4.24", "4.22", "4.20", "4.18"]
 
 versions.sort(reverse = True)
 
