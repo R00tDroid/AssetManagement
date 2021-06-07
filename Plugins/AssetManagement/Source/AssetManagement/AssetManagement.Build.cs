@@ -26,6 +26,6 @@ public class AssetManagement : ModuleRules
                 "UMGEditor",
                 "Projects"
             }
-			);
+		);
 	}
 }
