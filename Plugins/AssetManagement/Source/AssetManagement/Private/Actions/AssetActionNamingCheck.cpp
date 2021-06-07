@@ -1,4 +1,6 @@
 #include "AssetActionNamingCheck.h"
+
+#include "AssetMagementConfig.h"
 #include "AssetRegistryModule.h"
 #include "ObjectTools.h"
 #include "Framework/Notifications/NotificationManager.h"
@@ -18,7 +20,7 @@ AssetActionNamingCheck::AssetActionNamingCheck()
 {
 	NamingPatterns = GetDefaultPatterns();
 
-	NamingPatterns.Sort([](const NamingPattern& A, const NamingPattern& B)
+	NamingPatterns.Sort([](const FNamingPattern& A, const FNamingPattern& B)
 	{
 		return A.Class->IsChildOf(B.Class);
 	});
@@ -106,9 +108,9 @@ void AssetActionNamingCheck::ExecuteAction(TArray<FAssetData> Assets)
 	}
 }
 
-TArray<NamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
+TArray<FNamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 {
-	TArray<NamingPattern> Patterns;
+	TArray<FNamingPattern> Patterns;
 	
 	Patterns.Add({ UWidgetBlueprint::StaticClass(), "WBP_", "" });
 
@@ -125,9 +127,9 @@ TArray<NamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 
 FString AssetActionNamingCheck::GetNameForAsset(FString Name, UClass* Class)
 {
-	NamingPattern* Pattern = nullptr;
+	FNamingPattern* Pattern = nullptr;
 	
-	for(NamingPattern& Check : NamingPatterns)
+	for(FNamingPattern& Check : NamingPatterns)
 	{
 		if(Check.Class == Class)
 		{

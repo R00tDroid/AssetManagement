@@ -1,10 +1,21 @@
 #pragma once
 #include "../AssetAction.h"
+#include "AssetActionNamingCheck.generated.h"
 
-struct NamingPattern
+
+USTRUCT(BlueprintType)
+struct FNamingPattern
 {
+	GENERATED_BODY();
+
+public:
+	UPROPERTY()
 	UClass* Class;
+
+	UPROPERTY()
 	FString Prefix;
+
+	UPROPERTY()
 	FString Suffix;
 };
 
@@ -20,10 +31,10 @@ public:
 	FString GetFilterName() override { return "Naming conventions"; }
 	FString GetApplyAllTag() override { return "Apply all naming conventions"; }
 
-	static TArray<NamingPattern> GetDefaultPatterns();
+	static TArray<FNamingPattern> GetDefaultPatterns();
 
 private:
-	TArray<NamingPattern> NamingPatterns;
+	TArray<FNamingPattern> NamingPatterns;
 
 	FString GetNameForAsset(FString Name, UClass* Class);
 };
