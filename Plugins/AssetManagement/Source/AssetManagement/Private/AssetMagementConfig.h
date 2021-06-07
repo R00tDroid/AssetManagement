@@ -16,6 +16,9 @@ public:
 	int GetInt(FString Section, FString Key, int DefaultValue);
 	void SetInt(FString Section, FString Key, int Value);
 
+	FString GetString(FString Section, FString Key, FString DefaultValue);
+	void SetString(FString Section, FString Key, FString Value);
+
 private:
 	FString GetPluginConfig();
 	FString GetProjectConfig();

@@ -59,6 +59,21 @@ void AssetManagerConfig::SetInt(FString Section, FString Key, int Value)
 	GConfig->Flush(false, GetConfig());
 }
 
+FString AssetManagerConfig::GetString(FString Section, FString Key, FString DefaultValue)
+{
+	FString Value;
+	bool res = GConfig->GetString(*Section, *Key, Value, GetConfig());
+	if (!res) { SetString(Section, Key, DefaultValue); return DefaultValue; }
+
+	return Value;
+}
+
+void AssetManagerConfig::SetString(FString Section, FString Key, FString Value)
+{
+	GConfig->SetString(*Section, *Key, *Value, GetConfig());
+	GConfig->Flush(false, GetConfig());
+}
+
 FString AssetManagerConfig::GetPluginConfig()
 {
 	FString path = "";
