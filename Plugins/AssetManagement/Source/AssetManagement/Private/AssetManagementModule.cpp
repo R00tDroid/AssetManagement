@@ -3,6 +3,7 @@
 #include "Widgets/Docking/SDockTab.h"
 #include "AssetManagementWidget.h"
 #include "AssetManagementCommands.h"
+#include "ISettingsModule.h"
 
 #define LOCTEXT_NAMESPACE "FAssetManagementModule"
 
@@ -32,14 +33,25 @@ void FAssetManagementModule::StartupModule()
 	MainMenuExtender->AddMenuBarExtension("Window", EExtensionHook::After, AssetManagementCommands::menu_commands, FMenuBarExtensionDelegate::CreateStatic(&AssetManagementCommands::BuildMenu));
 	LevelEditorModule.GetMenuExtensibilityManager()->AddExtender(MainMenuExtender);
 
-	manager = MakeShareable(new AssetManager());
-	manager->Create();
+	Manager = MakeShareable(new AssetManager());
+	Manager->Create();
+
+	SettingsEditor = GetMutableDefault<UProjectSettingsEditor>();
+	if (ISettingsModule* SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
+	{
+		SettingsModule->RegisterSettings(
+			"Editor", "Advanced", "Advanced Asset Management",
+			LOCTEXT("RuntimeSettingsName", "Advanced Asset Management"),
+			LOCTEXT("RuntimeSettingsDescription", "Configure Advanced Asset Management"),
+			SettingsEditor
+		);
+	}
 }
 
 void FAssetManagementModule::ShutdownModule()
 {
-	manager->Destroy();
-	manager.Reset();
+	Manager->Destroy();
+	Manager.Reset();
 	
 	FLevelEditorModule& LevelEditorModule = FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor");
 	TSharedPtr<FTabManager> tab_manager = LevelEditorModule.GetLevelEditorTabManager();
@@ -48,6 +60,11 @@ void FAssetManagementModule::ShutdownModule()
 	{
 		tab_manager->UnregisterTabSpawner(assetmanager_tab);
 	}
+}
+
+UProjectSettingsEditor* FAssetManagementModule::GetSettingsEditor()
+{
+	return SettingsEditor;
 }
 
 #undef LOCTEXT_NAMESPACE
