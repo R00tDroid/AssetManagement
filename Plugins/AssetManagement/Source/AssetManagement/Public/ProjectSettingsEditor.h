@@ -32,14 +32,18 @@ public:
     virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
 
 private:
-    UPROPERTY(config, EditAnywhere, Category = Settings, meta = (
+    UPROPERTY(EditAnywhere, Category = Settings, meta = (
         ToolTip = "Where the settings will be saved."),
         DisplayName = "Settings storage")
     EProjectSettingStorage SettingStorage = EProjectSettingStorage::PSS_PerUser;
 
-    UPROPERTY(config, EditAnywhere, Category = Assets, meta = (
+    UPROPERTY(EditAnywhere, Category = Assets, meta = (
         DisplayName = "Assets naming conventions", ShowOnlyInnerProperties))
     TMap<TSubclassOf<UObject>, FNamingConvention> NamingConventions;
+
+    UPROPERTY(EditAnywhere, Category = Assets, meta = (
+        DisplayName = "Assets naming conventions", ShowOnlyInnerProperties))
+    TArray<UWorld*> PlayableLevels;
 
     void Save();
     virtual void PostInitProperties() override;
