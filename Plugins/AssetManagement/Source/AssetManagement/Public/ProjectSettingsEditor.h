@@ -1,6 +1,5 @@
 #pragma once
 #include "CoreMinimal.h"
-#include "UObject/Object.h"
 #include "ProjectSettingsEditor.generated.h"
 
 UENUM()
@@ -21,7 +20,7 @@ struct FNamingConvention
     FString Suffix;
 };
 
-UCLASS(config = EditorPerProjectUserSettings)
+UCLASS()
 class UProjectSettingsEditor : public UObject
 {
     GENERATED_BODY()
@@ -42,10 +41,12 @@ private:
     TMap<TSubclassOf<UObject>, FNamingConvention> NamingConventions;
 
     UPROPERTY(EditAnywhere, Category = Assets, meta = (
-        DisplayName = "Assets naming conventions", ShowOnlyInnerProperties))
+        DisplayName = "Playable levels", ShowOnlyInnerProperties))
     TArray<UWorld*> PlayableLevels;
 
-    void Save();
+    void SaveConfig();
+    void LoadConfig();
+	
     virtual void PostInitProperties() override;
 #if WITH_EDITOR
     virtual bool CanEditChange(const FProperty* InProperty) const override;
