@@ -19,6 +19,9 @@ public:
 	FString GetString(FString Section, FString Key, FString DefaultValue);
 	void SetString(FString Section, FString Key, FString Value);
 
+	DECLARE_MULTICAST_DELEGATE(FOnConfigChanged)
+	static FOnConfigChanged OnConfigChanged;
+
 private:
 	FString GetPluginConfig();
 	FString GetProjectConfig();

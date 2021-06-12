@@ -4,6 +4,7 @@
 #include "IPluginManager.h"
 
 AssetManagerConfig AssetManagerConfig::instance;
+AssetManagerConfig::FOnConfigChanged AssetManagerConfig::OnConfigChanged;
 
 AssetManagerConfig& AssetManagerConfig::Get()
 {

@@ -20,6 +20,17 @@
 
 AssetActionNamingCheck::AssetActionNamingCheck()
 {
+	OnConfigChanged();
+	OnConfigChangedHandle = AssetManagerConfig::OnConfigChanged.AddRaw(this, &AssetActionNamingCheck::OnConfigChanged);
+}
+
+AssetActionNamingCheck::~AssetActionNamingCheck()
+{
+	AssetManagerConfig::OnConfigChanged.Remove(OnConfigChangedHandle);
+}
+
+void AssetActionNamingCheck::OnConfigChanged()
+{
 	FString JsonData = AssetManagerConfig::Get().GetString("Actions", "NamingPatterns", "");
 	if (!JsonData.IsEmpty())
 	{
@@ -30,6 +41,7 @@ AssetActionNamingCheck::AssetActionNamingCheck()
 		NamingPatterns = GetDefaultPatterns();
 		JsonData = NamingPatternsToJson(NamingPatterns);
 		AssetManagerConfig::Get().SetString("Actions", "NamingPatterns", JsonData);
+		AssetManagerConfig::OnConfigChanged.Broadcast();
 	}
 
 	NamingPatterns.Sort([](const FNamingPattern& A, const FNamingPattern& B)

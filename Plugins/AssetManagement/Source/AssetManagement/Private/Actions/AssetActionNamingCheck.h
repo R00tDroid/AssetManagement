@@ -19,10 +19,13 @@ public:
 	FString Suffix;
 };
 
-class AssetActionNamingCheck: public IAssetAction
+class AssetActionNamingCheck : public IAssetAction
 {
 public:
 	AssetActionNamingCheck();
+	~AssetActionNamingCheck();
+	
+	void OnConfigChanged();
 	
 	void ScanAssets(TArray<FAssetInfo>& Assets, uint16 AssignedId) override;
 	void ExecuteAction(TArray<FAssetData> Assets) override;
@@ -40,4 +43,6 @@ private:
 	TArray<FNamingPattern> NamingPatterns;
 
 	FString GetNameForAsset(FString Name, UClass* Class);
+
+	FDelegateHandle OnConfigChangedHandle;
 };
