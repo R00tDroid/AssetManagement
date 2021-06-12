@@ -10,6 +10,17 @@ enum class EProjectSettingStorage : uint8
 	PSS_PerUser          UMETA(DisplayName = "Per user")
 };
 
+USTRUCT()
+struct FNamingConvention
+{
+    GENERATED_BODY()
+    UPROPERTY(EditAnywhere)
+    FString Prefix;
+
+    UPROPERTY(EditAnywhere)
+    FString Suffix;
+};
+
 UCLASS(config = EditorPerProjectUserSettings)
 class UProjectSettingsEditor : public UObject
 {
@@ -27,8 +38,8 @@ private:
     EProjectSettingStorage SettingStorage = EProjectSettingStorage::PSS_PerUser;
 
     UPROPERTY(config, EditAnywhere, Category = Assets, meta = (
-        DisplayName = "Assets naming converntions"))
-    TMap<UClass*, FString> NamingConventions;
+        DisplayName = "Assets naming conventions", ShowOnlyInnerProperties))
+    TMap<TSubclassOf<UObject>, FNamingConvention> NamingConventions;
 
     void Save();
     virtual void PostInitProperties() override;

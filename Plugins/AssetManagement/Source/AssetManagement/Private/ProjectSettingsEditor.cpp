@@ -1,6 +1,31 @@
 #include "ProjectSettingsEditor.h"
 #include "AssetMagementConfig.h"
 #include "AssetManagementModule.h"
+#include "Actions/AssetActionNamingCheck.h"
+
+TMap<UClass*, FNamingConvention> ConvertNamingConventions(const TArray<FNamingPattern>& In)
+{
+    TMap<UClass*, FNamingConvention> Out;
+	
+	for(const FNamingPattern& Naming : In)
+	{
+        Out.Add(Naming.Class, { Naming.Prefix, Naming.Suffix });
+	}
+
+    return Out;
+}
+
+TArray<FNamingPattern> ConvertNamingConventions(const TMap<UClass*, FNamingConvention>& In)
+{
+    TArray<FNamingPattern> Out;
+
+    for (const auto& It : In)
+    {
+        Out.Add({It.Key, It.Value.Prefix, It.Value.Suffix });
+    }
+
+    return Out;
+}
 
 UProjectSettingsEditor& UProjectSettingsEditor::Get()
 {
