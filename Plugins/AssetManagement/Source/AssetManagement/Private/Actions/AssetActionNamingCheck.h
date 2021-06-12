@@ -33,6 +33,9 @@ public:
 
 	static TArray<FNamingPattern> GetDefaultPatterns();
 
+	static FString NamingPatternsToJson(const TArray<FNamingPattern>&);
+	static TArray<FNamingPattern> JsonToNamingPatterns(const FString&);
+
 private:
 	TArray<FNamingPattern> NamingPatterns;
 

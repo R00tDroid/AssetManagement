@@ -6,6 +6,9 @@
 #include "Widgets/Notifications/SNotificationList.h"
 #include "FileHelpers.h"
 #include "ISourceControlModule.h"
+#include "Dom/JsonValue.h"
+#include "JsonSerializer.h"
+#include "JsonWriter.h"
 
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceConstant.h"
@@ -17,7 +20,17 @@
 
 AssetActionNamingCheck::AssetActionNamingCheck()
 {
-	NamingPatterns = GetDefaultPatterns();
+	FString JsonData = AssetManagerConfig::Get().GetString("Actions", "NamingPatterns", "");
+	if (!JsonData.IsEmpty())
+	{
+		NamingPatterns = JsonToNamingPatterns(JsonData);
+	}
+	else
+	{
+		NamingPatterns = GetDefaultPatterns();
+		JsonData = NamingPatternsToJson(NamingPatterns);
+		AssetManagerConfig::Get().SetString("Actions", "NamingPatterns", JsonData);
+	}
 
 	NamingPatterns.Sort([](const FNamingPattern& A, const FNamingPattern& B)
 	{
@@ -123,6 +136,67 @@ TArray<FNamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 
 	Patterns.Add({ UStaticMesh::StaticClass(), "SM_", "" });
 
+	return Patterns;
+}
+
+FString AssetActionNamingCheck::NamingPatternsToJson(const TArray<FNamingPattern>& Patterns)
+{
+	TArray<TSharedPtr<FJsonObject>> PatternObjects;
+	TArray<TSharedPtr<FJsonValue>> PatternValues;
+	for(const FNamingPattern& Pattern : Patterns)
+	{
+		TSharedPtr<FJsonObject> Object = MakeShareable(new FJsonObject);
+		PatternObjects.Add(Object);
+		Object->SetStringField("Class", Pattern.Class->GetPathName());
+		Object->SetStringField("Prefix", Pattern.Prefix);
+		Object->SetStringField("Suffix", Pattern.Suffix);
+
+		PatternValues.Add(MakeShareable(new FJsonValueObject(Object)));
+	}
+
+	TSharedRef<FJsonObject> RootObject = MakeShareable(new FJsonObject);
+	RootObject->SetArrayField("Patterns", PatternValues);
+	
+	FString OutputString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutputString);
+	FJsonSerializer::Serialize(RootObject, Writer);
+	
+	return OutputString;
+}
+
+TArray<FNamingPattern> AssetActionNamingCheck::JsonToNamingPatterns(const FString& InputString)
+{
+	TArray<FNamingPattern> Patterns = {};
+	
+	TSharedPtr<FJsonObject> RootObject;
+	
+	TSharedRef<TJsonReader<>> Reader = TJsonReaderFactory<>::Create(InputString);
+	FJsonSerializer::Deserialize(Reader, RootObject);
+
+	if (RootObject.IsValid())
+	{
+		TArray<TSharedPtr<FJsonValue>> Array = RootObject->GetArrayField("Patterns");
+		for(TSharedPtr<FJsonValue>& Value : Array)
+		{
+			const TSharedPtr<FJsonObject>* Object;
+			if (Value->TryGetObject(Object))
+			{
+				FString ClassName, Prefix, Suffix;
+				Object->Get()->TryGetStringField("Class", ClassName);
+				Object->Get()->TryGetStringField("Prefix", Prefix);
+				Object->Get()->TryGetStringField("Suffix", Suffix);
+
+				UClass* Class = nullptr;
+				if (!ClassName.IsEmpty()) Class = LoadClass<UObject>(nullptr, *ClassName);
+
+				if (Class != nullptr)
+				{
+					Patterns.Add({ Class, Prefix, Suffix });
+				}
+			}
+		}
+	}
+	
 	return Patterns;
 }
 

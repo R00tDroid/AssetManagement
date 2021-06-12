@@ -24,8 +24,9 @@ public class AssetManagement : ModuleRules
 			    "UnrealEd",
                 "EditorStyle",
                 "UMGEditor",
-                "Projects"
-            }
+                "Projects",
+                "Json"
+			}
 		);
 	}
 }
