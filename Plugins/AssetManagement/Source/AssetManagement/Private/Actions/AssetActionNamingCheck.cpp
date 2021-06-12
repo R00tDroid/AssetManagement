@@ -1,20 +1,19 @@
 #include "AssetActionNamingCheck.h"
 
 #include "AssetMagementConfig.h"
-#include "AssetRegistryModule.h"
 #include "ObjectTools.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
+#include "FileHelpers.h"
+#include "ISourceControlModule.h"
 
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceConstant.h"
-#include "WidgetBlueprint.h"
 #include "Engine/UserDefinedEnum.h"
 #include "Engine/UserDefinedStruct.h"
 #include "AssetToolsModule.h"
-#include "ISourceControlModule.h"
-#include "FileHelpers.h"
-
+#include "WidgetBlueprint.h"
+#include "Animation/AnimBlueprint.h"
 
 AssetActionNamingCheck::AssetActionNamingCheck()
 {
@@ -111,7 +110,9 @@ void AssetActionNamingCheck::ExecuteAction(TArray<FAssetData> Assets)
 TArray<FNamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 {
 	TArray<FNamingPattern> Patterns;
-	
+
+	Patterns.Add({ UBlueprint::StaticClass(), "BP_", "" });
+	Patterns.Add({ UAnimBlueprint::StaticClass(), "ABP_", "" });
 	Patterns.Add({ UWidgetBlueprint::StaticClass(), "WBP_", "" });
 
 	Patterns.Add({ UUserDefinedStruct::StaticClass(), "F", "" });
