@@ -7,13 +7,18 @@ AssetManagerConfig AssetManagerConfig::instance;
 
 AssetManagerConfig& AssetManagerConfig::Get()
 {
+	instance.Load();
 	return instance;
 }
 
 void AssetManagerConfig::Load()
 {
-	bool res = GConfig->GetBool(TEXT("Global"), TEXT("UseProjectSettings"), UsingProjectConfig, GetProjectConfig());
-	if (!res) UsingProjectConfig = false;
+	if (!loaded) 
+	{
+		loaded = true;
+		bool res = GConfig->GetBool(TEXT("Global"), TEXT("UseProjectSettings"), UsingProjectConfig, GetProjectConfig());
+		if (!res) UsingProjectConfig = false;
+	}
 }
 
 bool AssetManagerConfig::UsesProjectSettings()

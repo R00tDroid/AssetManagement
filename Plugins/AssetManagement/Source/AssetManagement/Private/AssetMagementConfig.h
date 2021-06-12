@@ -27,4 +27,5 @@ private:
 	bool UsingProjectConfig = false;
 
 	static AssetManagerConfig instance;
+	bool loaded = false;
 };
