@@ -1,6 +1,7 @@
 #include "AssetActionNamingCheck.h"
 
 #include "AssetMagementConfig.h"
+#include "AssetMagementCore.h"
 #include "ObjectTools.h"
 #include "Framework/Notifications/NotificationManager.h"
 #include "Widgets/Notifications/SNotificationList.h"
@@ -48,6 +49,12 @@ void AssetActionNamingCheck::OnConfigChanged()
 	{
 		return A.Class->IsChildOf(B.Class);
 	});
+
+	AssetManager* manager = AssetManager::Get();
+	if (manager != nullptr)
+	{
+		manager->Get()->RequestRescan();
+	}
 }
 
 void AssetActionNamingCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 AssignedId)
