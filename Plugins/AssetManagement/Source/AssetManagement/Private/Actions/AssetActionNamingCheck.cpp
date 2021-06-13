@@ -144,7 +144,7 @@ TArray<FNamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 	TArray<FNamingPattern> Patterns;
 
 	Patterns.Add({ UBlueprint::StaticClass(), "BP_", "" });
-	Patterns.Add({ UAnimBlueprint::StaticClass(), "ABP_", "" });
+	Patterns.Add({ UAnimBlueprint::StaticClass(), "", "_AnimBP" });
 	Patterns.Add({ UWidgetBlueprint::StaticClass(), "WBP_", "" });
 
 	Patterns.Add({ UUserDefinedStruct::StaticClass(), "F", "" });
