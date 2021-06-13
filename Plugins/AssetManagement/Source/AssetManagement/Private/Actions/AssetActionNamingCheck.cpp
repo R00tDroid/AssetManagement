@@ -18,6 +18,10 @@
 #include "AssetToolsModule.h"
 #include "WidgetBlueprint.h"
 #include "Animation/AnimBlueprint.h"
+#include "Animation/BlendSpace.h"
+#include "Animation/BlendSpace1D.h"
+#include "Animation/Rig.h"
+#include "Particles/ParticleSystem.h"
 
 AssetActionNamingCheck::AssetActionNamingCheck()
 {
@@ -62,7 +66,7 @@ void AssetActionNamingCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 	for (FAssetInfo& Asset : Assets)
 	{
 		FString name = Asset.Data.AssetName.ToString();
-		FString suggested_name = GetNameForAsset(name, Asset.Data.GetClass());
+		FString suggested_name = GetNameForAsset(name, Asset.Data.GetClass(), Asset.Data.GetAsset());
 		
 		if(!name.Equals(suggested_name))
 		{
@@ -76,7 +80,7 @@ void AssetActionNamingCheck::ExecuteAction(TArray<FAssetData> Assets)
 	for (FAssetData& Asset : Assets) 
 	{
 		FString name = Asset.AssetName.ToString();
-		FString suggested_name = GetNameForAsset(name, Asset.GetClass());
+		FString suggested_name = GetNameForAsset(name, Asset.GetClass(), Asset.GetAsset());
 
 		if (!name.Equals(suggested_name))
 		{
@@ -143,32 +147,68 @@ TArray<FNamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 {
 	TArray<FNamingPattern> Patterns;
 
-	Patterns.Add({ UBlueprint::StaticClass(), "BP_", "" });
-	Patterns.Add({ UAnimBlueprint::StaticClass(), "", "_AnimBP" });
-	Patterns.Add({ UWidgetBlueprint::StaticClass(), "WBP_", "" });
+	Patterns.Add({ UBlueprint::StaticClass(), {}, "BP_", "" });
+	Patterns.Add({ UBlueprint::StaticClass(), {{ "BlueprintType", EClassPropertyType::CPT_Byte, FString::FromInt(EBlueprintType::BPTYPE_FunctionLibrary) }}, "BPFL_", "" });
+	Patterns.Add({ UBlueprint::StaticClass(), {{ "BlueprintType", EClassPropertyType::CPT_Byte, FString::FromInt(EBlueprintType::BPTYPE_Interface) }}, "BPI_", "" });
+	Patterns.Add({ UBlueprint::StaticClass(), {{ "BlueprintType", EClassPropertyType::CPT_Byte, FString::FromInt(EBlueprintType::BPTYPE_MacroLibrary) }}, "BPML_", "" });
+	Patterns.Add({ UAnimBlueprint::StaticClass(), {}, "ABP_", "" });
+	Patterns.Add({ UWidgetBlueprint::StaticClass(), {}, "WBP_", "" });
 
-	Patterns.Add({ UUserDefinedStruct::StaticClass(), "F", "" });
-	Patterns.Add({ UUserDefinedEnum::StaticClass(), "E", "" });
+	Patterns.Add({ UUserDefinedStruct::StaticClass(), {}, "F", "" });
+	Patterns.Add({ UUserDefinedEnum::StaticClass(), {}, "E", "" });
 
-	Patterns.Add({ UMaterialInstanceConstant::StaticClass(), "MI_", "" });
-	Patterns.Add({ UMaterial::StaticClass(), "M_", "" });
+	Patterns.Add({ UMaterialInstanceConstant::StaticClass(), {}, "MI_", "" });
+	Patterns.Add({ UMaterial::StaticClass(), {}, "M_", "" });
+	
+	Patterns.Add({ UStaticMesh::StaticClass(), {}, "SM_", "" });
+	Patterns.Add({ USkeletalMesh::StaticClass(), {}, "SK_", "" });
 
-	Patterns.Add({ UStaticMesh::StaticClass(), "SM_", "" });
+	//Patterns.Add({ UTexture::StaticClass(), {}, "T_", "_?" });
+	//Patterns.Add({ URenderTarget::StaticClass(), {}, "RT_", "" });
+	//Patterns.Add({ UMediaTexture::StaticClass(), {}, "MT_", "" });
 
+	Patterns.Add({ UParticleSystem::StaticClass(), {}, "PS_", "" });
+
+	/*Patterns.Add({ UAimOffset::StaticClass(), {}, "AO_", "" });
+	Patterns.Add({ UAimOffset1D::StaticClass(), {}, "AO_", "" });
+	Patterns.Add({ UAnimationComposite::StaticClass(), {}, "AC_", "" });
+	Patterns.Add({ UAnimationMontage::StaticClass(), {}, "AM_", "" });
+	Patterns.Add({ UAnimationSequence::StaticClass(), {}, "A_", "" });*/
+	Patterns.Add({ UBlendSpace::StaticClass(), {}, "BS_", "" });
+	Patterns.Add({ UBlendSpace1D::StaticClass(), {}, "BS_", "" });
+
+	//Patterns.Add({ ULevelSequence::StaticClass(), {}, "LS_", "" });
+	Patterns.Add({ URig::StaticClass(), {}, "Rig_", "" });
+	Patterns.Add({ USkeleton::StaticClass(), {}, "Skel_", "" });
+	
 	return Patterns;
 }
 
 FString AssetActionNamingCheck::NamingPatternsToJson(const TArray<FNamingPattern>& Patterns)
 {
-	TArray<TSharedPtr<FJsonObject>> PatternObjects;
+	if (Patterns.Num() == 0)
+	{
+		return "";
+	}
+
 	TArray<TSharedPtr<FJsonValue>> PatternValues;
 	for(const FNamingPattern& Pattern : Patterns)
 	{
 		TSharedPtr<FJsonObject> Object = MakeShareable(new FJsonObject);
-		PatternObjects.Add(Object);
 		Object->SetStringField("Class", Pattern.Class->GetPathName());
 		Object->SetStringField("Prefix", Pattern.Prefix);
 		Object->SetStringField("Suffix", Pattern.Suffix);
+
+		TArray<TSharedPtr<FJsonValue>> PropertyList;
+		for (const FPropertyFilter& Filter : Pattern.ClassProperties)
+		{
+			TSharedPtr<FJsonObject> FilterObject = MakeShareable(new FJsonObject);
+			FilterObject->SetStringField("Property", Filter.PropertyName);
+			FilterObject->SetNumberField("Type", (int)Filter.PropertyType);
+			FilterObject->SetStringField("Value", Filter.ExpectedValue);
+			PropertyList.Add(MakeShareable(new FJsonValueObject(FilterObject)));
+		}
+		Object->SetArrayField("Properties", PropertyList);
 
 		PatternValues.Add(MakeShareable(new FJsonValueObject(Object)));
 	}
@@ -201,16 +241,40 @@ TArray<FNamingPattern> AssetActionNamingCheck::JsonToNamingPatterns(const FStrin
 			if (Value->TryGetObject(Object))
 			{
 				FString ClassName, Prefix, Suffix;
+				TArray<FPropertyFilter> PropertyFilters;
+				
 				Object->Get()->TryGetStringField("Class", ClassName);
 				Object->Get()->TryGetStringField("Prefix", Prefix);
 				Object->Get()->TryGetStringField("Suffix", Suffix);
+
+				const TArray<TSharedPtr<FJsonValue>>* FilterArray;
+				if (Object->Get()->TryGetArrayField("Properties", FilterArray))
+				{
+					for (TSharedPtr<FJsonValue> Filter : (*FilterArray))
+					{
+						const TSharedPtr<FJsonObject>* FilterObject;
+						if (Filter->TryGetObject(FilterObject))
+						{
+							FString PropertyName, ExpectedValue;
+							int Type;
+							FilterObject->Get()->TryGetStringField("Property", PropertyName);
+							FilterObject->Get()->TryGetNumberField("Type", Type);
+							FilterObject->Get()->TryGetStringField("Value", ExpectedValue);
+
+							if (!PropertyName.IsEmpty() && !ExpectedValue.IsEmpty())
+							{
+								PropertyFilters.Add({ PropertyName, static_cast<EClassPropertyType>(Type), ExpectedValue });
+							}
+						}
+					}
+				}
 
 				UClass* Class = nullptr;
 				if (!ClassName.IsEmpty()) Class = LoadClass<UObject>(nullptr, *ClassName);
 
 				if (Class != nullptr)
 				{
-					Patterns.Add({ Class, Prefix, Suffix });
+					Patterns.Add({ Class, PropertyFilters, Prefix, Suffix });
 				}
 			}
 		}
@@ -219,16 +283,66 @@ TArray<FNamingPattern> AssetActionNamingCheck::JsonToNamingPatterns(const FStrin
 	return Patterns;
 }
 
-FString AssetActionNamingCheck::GetNameForAsset(FString Name, UClass* Class)
+#define FindPropertyValue(PropType, TargetVar, PropClass, PropName, PropObject) U##PropType##Property* Prop = FindField<U##PropType##Property>(PropClass, PropName); if (Prop != nullptr) { TargetVar = Prop->GetPropertyValue_InContainer(PropObject); }
+
+FString GetObjectProperty(UClass* Class, UObject* Object, FString PropertyName, EClassPropertyType PropertyType)
+{
+	switch (PropertyType)
+	{
+		case EClassPropertyType::CPT_String:
+		{
+			FString Out = "";
+			FindPropertyValue(Str, Out, Class, *PropertyName, Object);
+			return Out;
+		}
+		case EClassPropertyType::CPT_Byte:
+		{
+			unsigned char Out = 0;
+			FindPropertyValue(Byte, Out, Class, *PropertyName, Object);
+			return FString::FromInt(Out);
+		}
+		case EClassPropertyType::CPT_Int32:
+		{
+			int32 Out = 0;
+			FindPropertyValue(Int, Out, Class, *PropertyName, Object);
+			return FString::FromInt(Out);
+		}
+		case EClassPropertyType::CPT_Float:
+		{
+			float Out = 0;
+			FindPropertyValue(Float, Out, Class, *PropertyName, Object);
+			return FString::SanitizeFloat(Out);
+		}
+	}
+
+	return "";
+}
+
+FString AssetActionNamingCheck::GetNameForAsset(FString Name, UClass* Class, UObject* Object)
 {
 	FNamingPattern* Pattern = nullptr;
-	
+
 	for(FNamingPattern& Check : NamingPatterns)
 	{
 		if (Class == Check.Class || Class->IsChildOf(Check.Class))
 		{
-			Pattern = &Check;
-			break;
+			bool Valid = true;
+
+			for( FPropertyFilter& PropertyFilter : Check.ClassProperties)
+			{
+				FString Value = GetObjectProperty(Class, Object, PropertyFilter.PropertyName, PropertyFilter.PropertyType);
+				if (Value != PropertyFilter.ExpectedValue)
+				{
+					Valid = false;
+					break;
+				}
+			}
+			
+			if (Valid) 
+			{
+				Pattern = &Check;
+				break;
+			}
 		}
 	}
 

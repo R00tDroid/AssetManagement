@@ -1,5 +1,6 @@
 #pragma once
 #include "CoreMinimal.h"
+#include "Actions/AssetActionNamingCheck.h"
 #include "ProjectSettingsEditor.generated.h"
 
 UENUM()
@@ -13,11 +14,24 @@ USTRUCT()
 struct FNamingConvention
 {
     GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    TArray<FPropertyFilter> PropertyFilters;
+	
     UPROPERTY(EditAnywhere)
     FString Prefix;
 
     UPROPERTY(EditAnywhere)
     FString Suffix;
+};
+
+USTRUCT()
+struct FNamingConventionList
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere)
+    TArray<FNamingConvention> Conventions;
 };
 
 UCLASS()
@@ -38,7 +52,7 @@ private:
 
     UPROPERTY(EditAnywhere, Category = Assets, meta = (
         DisplayName = "Assets naming conventions", ShowOnlyInnerProperties))
-    TMap<TSubclassOf<UObject>, FNamingConvention> NamingConventions;
+    TMap<TSubclassOf<UObject>, FNamingConventionList> NamingConventions;
 
     UPROPERTY(EditAnywhere, Category = Assets, meta = (
         DisplayName = "Playable levels", ShowOnlyInnerProperties))

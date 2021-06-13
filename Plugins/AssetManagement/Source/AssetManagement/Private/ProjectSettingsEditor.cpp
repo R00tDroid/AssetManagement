@@ -3,25 +3,31 @@
 #include "AssetManagementModule.h"
 #include "Actions/AssetActionNamingCheck.h"
 
-TMap<TSubclassOf<UObject>, FNamingConvention> ConvertNamingConventions(const TArray<FNamingPattern>& In)
+TMap<TSubclassOf<UObject>, FNamingConventionList> ConvertNamingConventions(const TArray<FNamingPattern>& In)
 {
-    TMap<TSubclassOf<UObject>, FNamingConvention> Out;
+    TMap<TSubclassOf<UObject>, FNamingConventionList> Out;
 	
 	for(const FNamingPattern& Naming : In)
 	{
-        Out.Add(Naming.Class, { Naming.Prefix, Naming.Suffix });
+		if (!Out.Contains(Naming.Class))
+		{
+            Out.Add(Naming.Class, {});
+		}
+		
+        Out[Naming.Class].Conventions.Add({ Naming.ClassProperties, Naming.Prefix, Naming.Suffix });
 	}
 
     return Out;
 }
 
-TArray<FNamingPattern> ConvertNamingConventions(const TMap<TSubclassOf<UObject>, FNamingConvention>& In)
+TArray<FNamingPattern> ConvertNamingConventions(const TMap<TSubclassOf<UObject>, FNamingConventionList>& In)
 {
     TArray<FNamingPattern> Out;
 
-    for (const auto& It : In)
+    for (const auto& ListIt : In)
     {
-        Out.Add({It.Key, It.Value.Prefix, It.Value.Suffix });
+    	for (const auto FilterIt : ListIt.Value.Conventions)
+        Out.Add({ ListIt.Key, FilterIt.PropertyFilters, FilterIt.Prefix, FilterIt.Suffix });
     }
 
     return Out;
@@ -90,7 +96,7 @@ void UProjectSettingsEditor::PostInitProperties()
 
     LoadConfig();
     AssetManagerConfig::OnConfigChanged.AddUObject(this, &UProjectSettingsEditor::LoadConfig);
-	
+
     SaveConfig();
 }
 

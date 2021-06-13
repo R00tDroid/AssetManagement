@@ -2,15 +2,40 @@
 #include "../AssetAction.h"
 #include "AssetActionNamingCheck.generated.h"
 
+UENUM()
+enum class EClassPropertyType : uint8
+{
+	CPT_String    UMETA(DisplayName = "String"),
+	CPT_Byte      UMETA(DisplayName = "Byte"),
+	CPT_Int32     UMETA(DisplayName = "Int32"),
+	CPT_Float     UMETA(DisplayName = "Float")
+};
+
+USTRUCT(BlueprintType)
+struct FPropertyFilter
+{
+	GENERATED_BODY();
+
+	UPROPERTY()
+	FString PropertyName;
+
+	UPROPERTY()
+	EClassPropertyType PropertyType;
+
+	UPROPERTY()
+	FString ExpectedValue;
+};
 
 USTRUCT(BlueprintType)
 struct FNamingPattern
 {
 	GENERATED_BODY();
 
-public:
 	UPROPERTY()
 	UClass* Class;
+
+	UPROPERTY()
+	TArray<FPropertyFilter> ClassProperties;
 
 	UPROPERTY()
 	FString Prefix;
@@ -42,7 +67,7 @@ public:
 private:
 	TArray<FNamingPattern> NamingPatterns;
 
-	FString GetNameForAsset(FString Name, UClass* Class);
+	FString GetNameForAsset(FString Name, UClass* Class, UObject* Object);
 
 	FDelegateHandle OnConfigChangedHandle;
 };
