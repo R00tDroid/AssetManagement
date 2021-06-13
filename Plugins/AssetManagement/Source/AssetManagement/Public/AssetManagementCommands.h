@@ -8,22 +8,22 @@ class AssetManagementCommands : public TCommands<AssetManagementCommands>
 {
 private:
 
-	friend class TCommands<AssetManagementCommands>;
+    friend class TCommands<AssetManagementCommands>;
 
-	AssetManagementCommands();
+    AssetManagementCommands();
 
 public:
 
-	virtual void RegisterCommands() override;
+    virtual void RegisterCommands() override;
 
-	static void BindCommands();
+    static void BindCommands();
 
-	static void BuildMenu(FMenuBarBuilder& MenuBuilder);
-	static void MakeMenu(FMenuBuilder& MenuBuilder);
+    static void BuildMenu(FMenuBarBuilder& MenuBuilder);
+    static void MakeMenu(FMenuBuilder& MenuBuilder);
 
-	static TSharedPtr<FUICommandList> menu_commands;
+    static TSharedPtr<FUICommandList> menu_commands;
 
 private:
-	TSharedPtr<FUICommandInfo> open_assetmanager;
-	TSharedPtr<FUICommandInfo> execute_fixredirectors;
+    TSharedPtr<FUICommandInfo> open_assetmanager;
+    TSharedPtr<FUICommandInfo> execute_fixredirectors;
 };

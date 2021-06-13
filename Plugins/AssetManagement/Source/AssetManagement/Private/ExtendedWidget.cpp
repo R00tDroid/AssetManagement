@@ -2,11 +2,11 @@
 
 void SExtendedWidget::Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime)
 {
-	if (!started) 
-	{
-		started = true;
-		Start();
-	}
+    if (!started) 
+    {
+        started = true;
+        Start();
+    }
 
-	SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
+    SCompoundWidget::Tick(AllottedGeometry, InCurrentTime, InDeltaTime);
 }

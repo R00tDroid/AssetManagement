@@ -6,16 +6,16 @@
 TMap<TSubclassOf<UObject>, FNamingConventionList> ConvertNamingConventions(const TArray<FNamingPattern>& In)
 {
     TMap<TSubclassOf<UObject>, FNamingConventionList> Out;
-	
-	for(const FNamingPattern& Naming : In)
-	{
-		if (!Out.Contains(Naming.Class))
-		{
+    
+    for(const FNamingPattern& Naming : In)
+    {
+        if (!Out.Contains(Naming.Class))
+        {
             Out.Add(Naming.Class, {});
-		}
-		
+        }
+        
         Out[Naming.Class].Conventions.Add({ Naming.ClassProperties, Naming.Prefix, Naming.Suffix });
-	}
+    }
 
     return Out;
 }
@@ -26,7 +26,7 @@ TArray<FNamingPattern> ConvertNamingConventions(const TMap<TSubclassOf<UObject>,
 
     for (const auto& ListIt : In)
     {
-    	for (const auto FilterIt : ListIt.Value.Conventions)
+        for (const auto FilterIt : ListIt.Value.Conventions)
         Out.Add({ ListIt.Key, FilterIt.PropertyFilters, FilterIt.Prefix, FilterIt.Suffix });
     }
 

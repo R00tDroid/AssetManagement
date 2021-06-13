@@ -6,8 +6,8 @@
 UENUM()
 enum class EProjectSettingStorage : uint8
 {
-	PSS_ProjectGlobal    UMETA(DisplayName = "Project"),
-	PSS_PerUser          UMETA(DisplayName = "Per user")
+    PSS_ProjectGlobal    UMETA(DisplayName = "Project"),
+    PSS_PerUser          UMETA(DisplayName = "Per user")
 };
 
 USTRUCT()
@@ -17,7 +17,7 @@ struct FNamingConvention
 
     UPROPERTY(EditAnywhere)
     TArray<FPropertyFilter> PropertyFilters;
-	
+    
     UPROPERTY(EditAnywhere)
     FString Prefix;
 
@@ -60,7 +60,7 @@ private:
 
     void SaveConfig();
     void LoadConfig();
-	
+    
     virtual void PostInitProperties() override;
 #if WITH_EDITOR
     virtual bool CanEditChange(const FProperty* InProperty) const override;

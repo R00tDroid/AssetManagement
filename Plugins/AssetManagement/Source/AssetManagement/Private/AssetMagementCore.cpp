@@ -16,293 +16,293 @@ AssetManager::FOnAssetListUpdated AssetManager::OnAssetListUpdated;
 
 void AssetManager::Create()
 {
-	if (instance_ != nullptr) UE_LOG(AssetManagementLog, Fatal, TEXT("AssetManager already started"))
-	instance_ = this;
+    if (instance_ != nullptr) UE_LOG(AssetManagementLog, Fatal, TEXT("AssetManager already started"))
+    instance_ = this;
 
-	AssetManagerConfig::Get().Load();
+    AssetManagerConfig::Get().Load();
 
-	AssetActions.Add(MakeShareable(new AssetActionUnusedCheck()));
-	AssetActions.Add(MakeShareable(new AssetActionNamingCheck()));
-	AssetActions.Add(MakeShareable(new AssetActionRedirector()));
-	
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+    AssetActions.Add(MakeShareable(new AssetActionUnusedCheck()));
+    AssetActions.Add(MakeShareable(new AssetActionNamingCheck()));
+    AssetActions.Add(MakeShareable(new AssetActionRedirector()));
+    
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
-	if (AssetRegistry.IsLoadingAssets())
-	{
-		AssetRegistry.OnFilesLoaded().AddSP(this, &AssetManager::BindToAssetRegistry);
-	}
-	else
-	{
-		BindToAssetRegistry();
-	}
+    if (AssetRegistry.IsLoadingAssets())
+    {
+        AssetRegistry.OnFilesLoaded().AddSP(this, &AssetManager::BindToAssetRegistry);
+    }
+    else
+    {
+        BindToAssetRegistry();
+    }
 }
 
 void AssetManager::Destroy()
 {
-	for(TSharedPtr<IAssetAction>& Action : AssetActions)
-	{
-		Action.Reset();
-	}
+    for(TSharedPtr<IAssetAction>& Action : AssetActions)
+    {
+        Action.Reset();
+    }
 
-	AssetActions.Empty();
-	
-	instance_ = nullptr;
+    AssetActions.Empty();
+    
+    instance_ = nullptr;
 }
 
 TArray<FAssetInfo> AssetManager::GetAssets()
 {
-	AssetLock.Lock();
-	TArray<FAssetInfo> res = Assets;
-	AssetLock.Unlock();
+    AssetLock.Lock();
+    TArray<FAssetInfo> res = Assets;
+    AssetLock.Unlock();
 
-	return res;
+    return res;
 }
 
 TArray<IAssetAction*> AssetManager::GetActions()
 {
-	TArray<IAssetAction*> actions;
-	for(TSharedPtr<IAssetAction>& Action : AssetActions)
-	{
-		actions.Add(Action.Get());
-	}
+    TArray<IAssetAction*> actions;
+    for(TSharedPtr<IAssetAction>& Action : AssetActions)
+    {
+        actions.Add(Action.Get());
+    }
 
-	return actions;
+    return actions;
 }
 
 void AssetManager::RequestRescan()
 {
-	ScanAssets();
+    ScanAssets();
 }
 
 void AssetManager::OnAssetAdded(const FAssetData& Asset)
 {
-	bool found = false;
-	AssetLock.Lock();
-	for(FAssetInfo& info : Assets)
-	{
-		if (info.Data == Asset) { found = true; break; }
-	}
-	AssetLock.Unlock();
-	if (found) return;
-	
-	//TODO execute on separate thread
-	TArray<FAssetInfo> NewAssets = {{Asset, {}}};
-	ProcessAssets(NewAssets);
+    bool found = false;
+    AssetLock.Lock();
+    for(FAssetInfo& info : Assets)
+    {
+        if (info.Data == Asset) { found = true; break; }
+    }
+    AssetLock.Unlock();
+    if (found) return;
+    
+    //TODO execute on separate thread
+    TArray<FAssetInfo> NewAssets = {{Asset, {}}};
+    ProcessAssets(NewAssets);
 
-	if (NewAssets.Num() > 0)
-	{
-		AssetLock.Lock();
-		for (FAssetInfo& info : NewAssets)
-		{
-			Assets.Add(info);
-		}
-		PrepareAssetList();
-		AssetLock.Unlock();
-		OnAssetListUpdated.ExecuteIfBound();
-	}
+    if (NewAssets.Num() > 0)
+    {
+        AssetLock.Lock();
+        for (FAssetInfo& info : NewAssets)
+        {
+            Assets.Add(info);
+        }
+        PrepareAssetList();
+        AssetLock.Unlock();
+        OnAssetListUpdated.ExecuteIfBound();
+    }
 }
 
 void AssetManager::OnAssetUpdated(const FAssetData&)
 {
-	RequestRescan(); //TODO redo dependency scan
+    RequestRescan(); //TODO redo dependency scan
 }
 
 void AssetManager::OnAssetRenamed(const FAssetData&, const FString&)
 {
-	RequestRescan(); //TODO improve renamed asset handling
+    RequestRescan(); //TODO improve renamed asset handling
 }
 
 void AssetManager::OnAssetRemoved(const FAssetData& Asset)
 {
-	bool changed = false;
-	AssetLock.Lock();
-	for (int i = 0; i < Assets.Num(); i++)
-	{
-		if (Assets[i].Data == Asset) 
-		{
-			Assets.RemoveAt(i);
-			i--;
-			changed = true;
-		}
-	}
-	if (changed) PrepareAssetList();
-	AssetLock.Unlock();
-	
-	if(changed) OnAssetListUpdated.ExecuteIfBound();
+    bool changed = false;
+    AssetLock.Lock();
+    for (int i = 0; i < Assets.Num(); i++)
+    {
+        if (Assets[i].Data == Asset) 
+        {
+            Assets.RemoveAt(i);
+            i--;
+            changed = true;
+        }
+    }
+    if (changed) PrepareAssetList();
+    AssetLock.Unlock();
+    
+    if(changed) OnAssetListUpdated.ExecuteIfBound();
 }
 
 void AssetManager::BindToAssetRegistry()
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
-	AssetRegistry.OnAssetAdded().AddSP(this, &AssetManager::OnAssetAdded);
-	AssetRegistry.OnAssetRemoved().AddSP(this, &AssetManager::OnAssetUpdated);
-	AssetRegistry.OnAssetRemoved().AddSP(this, &AssetManager::OnAssetRemoved);
-	AssetRegistry.OnAssetRenamed().AddSP(this, &AssetManager::OnAssetRenamed);
+    AssetRegistry.OnAssetAdded().AddSP(this, &AssetManager::OnAssetAdded);
+    AssetRegistry.OnAssetRemoved().AddSP(this, &AssetManager::OnAssetUpdated);
+    AssetRegistry.OnAssetRemoved().AddSP(this, &AssetManager::OnAssetRemoved);
+    AssetRegistry.OnAssetRenamed().AddSP(this, &AssetManager::OnAssetRenamed);
 
-	ScanAssets();
+    ScanAssets();
 }
 
 void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> ActionAssets)
 {
-	FWorldContext* PIEWorldContext = GEditor->GetPIEWorldContext();
-	if (PIEWorldContext)
-	{
-		FNotificationInfo Notification(FText::FromString("Can not modify assets while Play In Editor is active"));
-		Notification.ExpireDuration = 3.0f;
-		FSlateNotificationManager::Get().AddNotification(Notification);
+    FWorldContext* PIEWorldContext = GEditor->GetPIEWorldContext();
+    if (PIEWorldContext)
+    {
+        FNotificationInfo Notification(FText::FromString("Can not modify assets while Play In Editor is active"));
+        Notification.ExpireDuration = 3.0f;
+        FSlateNotificationManager::Get().AddNotification(Notification);
 
-		return;
-	}
-	
-	if(AssetActions.IsValidIndex(ActionId))
-	{
-		AssetActions[ActionId]->ExecuteAction(ActionAssets);
-	}
+        return;
+    }
+    
+    if(AssetActions.IsValidIndex(ActionId))
+    {
+        AssetActions[ActionId]->ExecuteAction(ActionAssets);
+    }
 }
 
 void AssetManager::FixAllRedirectors()
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
-	FARFilter filter;
-	filter.ClassNames.Add(UObjectRedirector::StaticClass()->GetFName());
-	filter.bRecursivePaths = true;
-	filter.PackagePaths.Add("/Game");
+    FARFilter filter;
+    filter.ClassNames.Add(UObjectRedirector::StaticClass()->GetFName());
+    filter.bRecursivePaths = true;
+    filter.PackagePaths.Add("/Game");
 
-	TArray<FAssetData> Redirectors;
-	AssetRegistry.GetAssets(filter, Redirectors);
-	
-	TArray<UObjectRedirector*> Objects;
+    TArray<FAssetData> Redirectors;
+    AssetRegistry.GetAssets(filter, Redirectors);
+    
+    TArray<UObjectRedirector*> Objects;
 
-	for (int32 i = 0; i < Redirectors.Num(); i++)
-	{
-		FAssetData& Asset = Redirectors[i];
+    for (int32 i = 0; i < Redirectors.Num(); i++)
+    {
+        FAssetData& Asset = Redirectors[i];
 
-		FString asset_name = FPaths::GetBaseFilename(Asset.PackageName.ToString());
+        FString asset_name = FPaths::GetBaseFilename(Asset.PackageName.ToString());
 
-		if (Asset.AssetName.ToString().Equals(asset_name))
-		{
-			Objects.AddUnique(static_cast<UObjectRedirector*>(Asset.GetAsset()));
-		}
-	}
-	
-	if(Objects.Num() == 0)
-	{
-		FNotificationInfo Notification(FText::FromString("No redirectors found"));
-		Notification.ExpireDuration = 2.0f;
-		FSlateNotificationManager::Get().AddNotification(Notification);
-	}
-	else 
-	{
-		FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
-		AssetToolsModule.Get().FixupReferencers(Objects);
+        if (Asset.AssetName.ToString().Equals(asset_name))
+        {
+            Objects.AddUnique(static_cast<UObjectRedirector*>(Asset.GetAsset()));
+        }
+    }
+    
+    if(Objects.Num() == 0)
+    {
+        FNotificationInfo Notification(FText::FromString("No redirectors found"));
+        Notification.ExpireDuration = 2.0f;
+        FSlateNotificationManager::Get().AddNotification(Notification);
+    }
+    else 
+    {
+        FAssetToolsModule& AssetToolsModule = FModuleManager::LoadModuleChecked<FAssetToolsModule>(TEXT("AssetTools"));
+        AssetToolsModule.Get().FixupReferencers(Objects);
 
-		FNotificationInfo Notification(FText::FromString("Fixed " + FString::FromInt(Objects.Num()) +  " redirector(s)"));
-		Notification.ExpireDuration = 2.0f;
-		FSlateNotificationManager::Get().AddNotification(Notification);
-	}
+        FNotificationInfo Notification(FText::FromString("Fixed " + FString::FromInt(Objects.Num()) +  " redirector(s)"));
+        Notification.ExpireDuration = 2.0f;
+        FSlateNotificationManager::Get().AddNotification(Notification);
+    }
 }
 
 void AssetManager::ScanAssets() //TODO perform scan on worker thread
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
-	TArray<FAssetData> RawAssets;
-	bool res = AssetRegistry.GetAllAssets(RawAssets, true);
+    TArray<FAssetData> RawAssets;
+    bool res = AssetRegistry.GetAllAssets(RawAssets, true);
 
-	TArray<FAssetInfo> NewAssets;
+    TArray<FAssetInfo> NewAssets;
 
-	for (FAssetData Asset : RawAssets)
-	{
-		NewAssets.Add({ Asset, {} });
-	}
+    for (FAssetData Asset : RawAssets)
+    {
+        NewAssets.Add({ Asset, {} });
+    }
 
-	ProcessAssets(NewAssets);
+    ProcessAssets(NewAssets);
 
-	AssetLock.Lock();
-	Assets = NewAssets;
-	PrepareAssetList();
-	AssetLock.Unlock();
-	
-	OnAssetListUpdated.ExecuteIfBound();
+    AssetLock.Lock();
+    Assets = NewAssets;
+    PrepareAssetList();
+    AssetLock.Unlock();
+    
+    OnAssetListUpdated.ExecuteIfBound();
 }
 
 void AssetManager::ProcessAssets(TArray<FAssetInfo>& NewAssets)
 {
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
-	IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
-	
-	TArray<FAssetData> Worlds;
-	AssetRegistry.GetAssetsByClass(UWorld::StaticClass()->GetFName(), Worlds, true);
+    FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
+    IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
+    
+    TArray<FAssetData> Worlds;
+    AssetRegistry.GetAssetsByClass(UWorld::StaticClass()->GetFName(), Worlds, true);
 
-	for (int32 i = 0; i < Worlds.Num(); i++)
-	{
-		FAssetData& Asset = Worlds[i];
+    for (int32 i = 0; i < Worlds.Num(); i++)
+    {
+        FAssetData& Asset = Worlds[i];
 
-		if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
-		{
-			if (Worlds.IsValidIndex(i))
-			{
-				Worlds.RemoveAt(i);
-				i--;
-			}
-		}
-	}
+        if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
+        {
+            if (Worlds.IsValidIndex(i))
+            {
+                Worlds.RemoveAt(i);
+                i--;
+            }
+        }
+    }
 
-	for (int32 i = 0; i < NewAssets.Num(); i++)
-	{
-		FAssetData& Asset = NewAssets[i].Data;
+    for (int32 i = 0; i < NewAssets.Num(); i++)
+    {
+        FAssetData& Asset = NewAssets[i].Data;
 
-		if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
-		{
-			NewAssets.RemoveAt(i);
-			i--;
-			continue;
-		}
+        if (!Asset.PackageName.ToString().StartsWith("/Game/", ESearchCase::IgnoreCase))
+        {
+            NewAssets.RemoveAt(i);
+            i--;
+            continue;
+        }
 
-		FString asset_name = FPaths::GetBaseFilename(Asset.PackageName.ToString());
-		
-		if(!Asset.AssetName.ToString().Equals(asset_name))
-		{
-			NewAssets.RemoveAt(i);
-			i--;
-			continue;
-		}
-	}
+        FString asset_name = FPaths::GetBaseFilename(Asset.PackageName.ToString());
+        
+        if(!Asset.AssetName.ToString().Equals(asset_name))
+        {
+            NewAssets.RemoveAt(i);
+            i--;
+            continue;
+        }
+    }
 
 
 
-	uint16 id = 0;
-	for (TSharedPtr<IAssetAction>& Action : AssetActions)
-	{
-		Action->ScanAssets(NewAssets, id);
-		id++;
-	}
+    uint16 id = 0;
+    for (TSharedPtr<IAssetAction>& Action : AssetActions)
+    {
+        Action->ScanAssets(NewAssets, id);
+        id++;
+    }
 
-	for (int i = 0; i < NewAssets.Num(); i++)
-	{
-		if (NewAssets[i].ActionResults.Num() == 0)
-		{
-			NewAssets.RemoveAt(i);
-			i--;
-		}
-	}
+    for (int i = 0; i < NewAssets.Num(); i++)
+    {
+        if (NewAssets[i].ActionResults.Num() == 0)
+        {
+            NewAssets.RemoveAt(i);
+            i--;
+        }
+    }
 }
 
 void AssetManager::PrepareAssetList()
 {
-	Assets.Sort([](const FAssetInfo& A, const FAssetInfo& B)
-	{
-		return A.Data.PackageName < B.Data.PackageName;
-	});
+    Assets.Sort([](const FAssetInfo& A, const FAssetInfo& B)
+    {
+        return A.Data.PackageName < B.Data.PackageName;
+    });
 }
 
 AssetManager* AssetManager::Get()
 {
-	return instance_;
+    return instance_;
 }

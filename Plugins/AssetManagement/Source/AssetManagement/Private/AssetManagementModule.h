@@ -10,13 +10,13 @@ DECLARE_LOG_CATEGORY_EXTERN(AssetManagementLog, Log, All);
 class FAssetManagementModule : public IModuleInterface
 {
 public:
-	virtual void StartupModule() override;
-	virtual void ShutdownModule() override;
+    virtual void StartupModule() override;
+    virtual void ShutdownModule() override;
 
-	UProjectSettingsEditor* GetSettingsEditor();
+    UProjectSettingsEditor* GetSettingsEditor();
 
 private:
-	TSharedPtr<FExtender> MainMenuExtender;
-	TSharedPtr<AssetManager> Manager;
-	UProjectSettingsEditor* SettingsEditor = nullptr;
+    TSharedPtr<FExtender> MainMenuExtender;
+    TSharedPtr<AssetManager> Manager;
+    UProjectSettingsEditor* SettingsEditor = nullptr;
 };

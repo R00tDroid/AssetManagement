@@ -8,26 +8,26 @@
 
 class SWidgetAssetManagement : public SExtendedWidget
 {
-	SLATE_USER_ARGS(SWidgetAssetManagement)
-	{ }
+    SLATE_USER_ARGS(SWidgetAssetManagement)
+    { }
 
-	SLATE_END_ARGS()
+    SLATE_END_ARGS()
 
 public:
 
-	virtual void Construct(const FArguments& InArgs);
-	virtual void Start() override;
+    virtual void Construct(const FArguments& InArgs);
+    virtual void Start() override;
 
-	FReply RequestRescan();
+    FReply RequestRescan();
 
 private:
-	void PopulateAssets();
-	void ApplyAll(int Index);
-	
-	TSharedPtr<SVerticalBox> asset_list;
-	TArray<int> FilteredActions;
+    void PopulateAssets();
+    void ApplyAll(int Index);
+    
+    TSharedPtr<SVerticalBox> asset_list;
+    TArray<int> FilteredActions;
 
-	uint16 MaxAssetsInList = 500;
+    uint16 MaxAssetsInList = 500;
 };
 
 
@@ -36,50 +36,50 @@ class SActionToolTip : public SToolTip
 {
 public:
 
-	SLATE_BEGIN_ARGS(SActionToolTip) { }
-	SLATE_END_ARGS()
+    SLATE_BEGIN_ARGS(SActionToolTip) { }
+    SLATE_END_ARGS()
 
 public:
-	void Construct(const FArguments& InArgs)
-	{
-		SToolTip::Construct(
-			SToolTip::FArguments()
-			.Content()
-			[
-				SNew(SVerticalBox)
-				+ SVerticalBox::Slot()
-				.AutoHeight()
-				[
-					SAssignNew(heading, STextBlock)
-				]
+    void Construct(const FArguments& InArgs)
+    {
+        SToolTip::Construct(
+            SToolTip::FArguments()
+            .Content()
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(heading, STextBlock)
+                ]
 
-				+ SVerticalBox::Slot()
-				.AutoHeight()
-				.Padding(2)
-				[
-					SNew(SSeparator)
-					.Orientation(Orient_Horizontal)]
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(2)
+                [
+                    SNew(SSeparator)
+                    .Orientation(Orient_Horizontal)]
 
-				+ SVerticalBox::Slot()
-				.AutoHeight()
-				[
-					SAssignNew(content, STextBlock)
-				]
-			]
-		);
-	}
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(content, STextBlock)
+                ]
+            ]
+        );
+    }
 
-	void SetHeading(FString text)
-	{
-		heading->SetText(FText::FromString(text));
-	}
+    void SetHeading(FString text)
+    {
+        heading->SetText(FText::FromString(text));
+    }
 
-	void SetContent(FString text)
-	{
-		content->SetText(FText::FromString(text));
-	}
+    void SetContent(FString text)
+    {
+        content->SetText(FText::FromString(text));
+    }
 
 private:
-	TSharedPtr<STextBlock> heading;
-	TSharedPtr<STextBlock> content;
+    TSharedPtr<STextBlock> heading;
+    TSharedPtr<STextBlock> content;
 };
