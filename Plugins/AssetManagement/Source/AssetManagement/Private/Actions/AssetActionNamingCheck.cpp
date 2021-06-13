@@ -252,8 +252,8 @@ FString AssetActionNamingCheck::GetNameForAsset(FString Name, UClass* Class)
 	else 
 	{
 		FString result = Name;
-		if (!Name.Mid(0, Pattern->Prefix.Len()).Equals(Pattern->Prefix)) result = Pattern->Prefix + result;
-		//TODO add suffix check
+		if (!Pattern->Prefix.IsEmpty() && !Name.Mid(0, Pattern->Prefix.Len()).Equals(Pattern->Prefix)) result = Pattern->Prefix + result;
+		if (!Pattern->Suffix.IsEmpty() && !Name.Mid(Name.Len() - Pattern->Suffix.Len()).Equals(Pattern->Suffix)) result = result + Pattern->Suffix;
 		return result;
 	}
 }
