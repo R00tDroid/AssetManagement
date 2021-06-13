@@ -29,10 +29,15 @@ bool AssetManagerConfig::UsesProjectSettings()
 
 void AssetManagerConfig::SetUseProjectSettings(bool Enable)
 {
-	UsingProjectConfig = Enable;
-	
-	GConfig->SetBool(TEXT("Global"), TEXT("UseProjectSettings"), Enable, GetProjectConfig());
-	GConfig->Flush(false, GetProjectConfig());
+	if (UsingProjectConfig != Enable)
+	{
+		UsingProjectConfig = Enable;
+
+		GConfig->SetBool(TEXT("Global"), TEXT("UseProjectSettings"), Enable, GetProjectConfig());
+		GConfig->Flush(false, GetProjectConfig());
+
+		OnConfigChanged.Broadcast();
+	}
 }
 
 bool AssetManagerConfig::GetBool(FString Section, FString Key, bool DefaultValue)
