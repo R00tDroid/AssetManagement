@@ -225,25 +225,12 @@ FString AssetActionNamingCheck::GetNameForAsset(FString Name, UClass* Class)
 	
 	for(FNamingPattern& Check : NamingPatterns)
 	{
-		if(Check.Class == Class)
+		if (Class == Check.Class || Class->IsChildOf(Check.Class))
 		{
 			Pattern = &Check;
 			break;
 		}
 	}
-
-	//TODO improve class detection
-	/*if (Pattern == nullptr) 
-	{
-		for (NamingPattern& Check : NamingPatterns)
-		{
-			if (Class->IsChildOf(Check.Class))
-			{
-				Pattern = &Check;
-				break;
-			}
-		}
-	}*/
 
 	if (Pattern == nullptr)
 	{
