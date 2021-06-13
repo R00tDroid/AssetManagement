@@ -145,7 +145,7 @@ void AssetManager::BindToAssetRegistry()
 	ScanAssets();
 }
 
-void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> Assets)
+void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> ActionAssets)
 {
 	FWorldContext* PIEWorldContext = GEditor->GetPIEWorldContext();
 	if (PIEWorldContext)
@@ -159,7 +159,7 @@ void AssetManager::RequestActionExecution(int ActionId, TArray<FAssetData> Asset
 	
 	if(AssetActions.IsValidIndex(ActionId))
 	{
-		AssetActions[ActionId]->ExecuteAction(Assets);
+		AssetActions[ActionId]->ExecuteAction(ActionAssets);
 	}
 }
 

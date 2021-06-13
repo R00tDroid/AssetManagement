@@ -10,6 +10,7 @@ struct FAssetInfo
 class IAssetAction
 {
 public:
+	virtual ~IAssetAction() = default;
 	virtual void ScanAssets(TArray<FAssetInfo>& Assets, uint16 AssignedId) = 0;
 
 	virtual void ExecuteAction(TArray<FAssetData> Assets) = 0;

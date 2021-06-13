@@ -23,7 +23,7 @@ class AssetActionNamingCheck : public IAssetAction
 {
 public:
 	AssetActionNamingCheck();
-	~AssetActionNamingCheck();
+	virtual ~AssetActionNamingCheck() override;
 	
 	void OnConfigChanged();
 	

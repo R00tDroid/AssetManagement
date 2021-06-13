@@ -8,6 +8,12 @@
 
 #define LOCTEXT_NAMESPACE "AssetManagementModule"
 
+#if ENGINE_MINOR_VERSION > 25
+	#define CompatibleInvokeTab TryInvokeTab
+#else
+	#define CompatibleInvokeTab InvokeTab
+#endif
+
 TSharedPtr<FUICommandList> AssetManagementCommands::menu_commands;
 
 
@@ -29,7 +35,7 @@ void AssetManagementCommands::BindCommands()
 	const AssetManagementCommands& Commands = AssetManagementCommands::Get();
 
 	FUICommandList& menu_actions = *menu_commands;
-	menu_actions.MapAction(Commands.open_assetmanager, FExecuteAction::CreateLambda([]() { FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor").GetLevelEditorTabManager()->InvokeTab(assetmanager_tab); }));
+	menu_actions.MapAction(Commands.open_assetmanager, FExecuteAction::CreateLambda([]() { FModuleManager::LoadModuleChecked<FLevelEditorModule>("LevelEditor").GetLevelEditorTabManager()->CompatibleInvokeTab(assetmanager_tab); }));
 	menu_actions.MapAction(Commands.execute_fixredirectors, FExecuteAction::CreateLambda([]()
 	{
 		AssetManager* manager = AssetManager::Get();
