@@ -63,6 +63,24 @@ void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 }
 
 void AssetActionUnusedCheck::ExecuteAction(TArray<FAssetData> Assets)
-{	
-	if (Assets.Num() > 0) ObjectTools::DeleteAssets(Assets, false); //TODO add confirmation toggle to config
+{
+	TArray<FAssetData> ToDelete;
+
+	bool AllYes = false;
+	bool AllNo = false;
+
+	for (FAssetData& Asset : Assets) 
+	{
+		EAppReturnType::Type SelectedOption = EAppReturnType::No;
+		if (!AllYes && !AllNo)
+		{
+			SelectedOption = FMessageDialog::Open(EAppMsgType::YesNoYesAllNoAll, EAppReturnType::NoAll, FText::FromString(FString("Are you sure you wish to delete the following file?\n") + Asset.AssetName.ToString()));
+			if (SelectedOption == EAppReturnType::YesAll) AllYes = true;
+			if (SelectedOption == EAppReturnType::NoAll) AllNo = true;
+		}
+
+		if (SelectedOption == EAppReturnType::Yes || AllYes) ToDelete.Add(Asset);
+	}
+	
+	if (Assets.Num() > 0) ObjectTools::DeleteAssets(ToDelete, false); //TODO add confirmation toggle to config
 }
