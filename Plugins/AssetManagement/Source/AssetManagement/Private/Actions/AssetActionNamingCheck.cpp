@@ -21,6 +21,8 @@
 #include "Animation/BlendSpace.h"
 #include "Animation/BlendSpace1D.h"
 #include "Animation/Rig.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Engine/TextureRenderTargetCube.h"
 #include "Particles/ParticleSystem.h"
 
 AssetActionNamingCheck::AssetActionNamingCheck()
@@ -143,43 +145,55 @@ void AssetActionNamingCheck::ExecuteAction(TArray<FAssetData> Assets)
     }
 }
 
+#define NAMED_OBJECT(CLASS_NAME) TSoftClassPtr<UObject>(FSoftObjectPath(TEXT("/Script/" #CLASS_NAME))).Get()
+#define STATIC_OBJECT(CLASS_NAME) CLASS_NAME::StaticClass()
+
+#define DEF_BASEBEG(CLASS) Patterns.Add({ CLASS
+#define DEF_BASEEND() })
+#define DEF_PREFIX(CLASS, PREFIX) DEF_BASEBEG(CLASS), {}, PREFIX, "" DEF_BASEEND()
+#define DEF_SUFFIX(CLASS, SUFFIX) DEF_BASEBEG(CLASS), {}, "", SUFFIX DEF_BASEEND()
+#define DEF_PREFIX_SUFFIX(CLASS, PREFIX, SUFFIX) DEF_BASEBEG(CLASS), {}, PREFIX, SUFFIX DEF_BASEEND()
+
 TArray<FNamingPattern> AssetActionNamingCheck::GetDefaultPatterns()
 {
     TArray<FNamingPattern> Patterns;
 
-    Patterns.Add({ UBlueprint::StaticClass(), {}, "BP_", "" });
+    DEF_PREFIX(STATIC_OBJECT(UBlueprint), "BP_");
     Patterns.Add({ UBlueprint::StaticClass(), {{ "BlueprintType", EClassPropertyType::CPT_Byte, FString::FromInt(EBlueprintType::BPTYPE_FunctionLibrary) }}, "BPFL_", "" });
     Patterns.Add({ UBlueprint::StaticClass(), {{ "BlueprintType", EClassPropertyType::CPT_Byte, FString::FromInt(EBlueprintType::BPTYPE_Interface) }}, "BPI_", "" });
     Patterns.Add({ UBlueprint::StaticClass(), {{ "BlueprintType", EClassPropertyType::CPT_Byte, FString::FromInt(EBlueprintType::BPTYPE_MacroLibrary) }}, "BPML_", "" });
-    Patterns.Add({ UAnimBlueprint::StaticClass(), {}, "ABP_", "" });
-    Patterns.Add({ UWidgetBlueprint::StaticClass(), {}, "WBP_", "" });
+    DEF_PREFIX(STATIC_OBJECT(UAnimBlueprint), "ABP_");
+    DEF_PREFIX(STATIC_OBJECT(UWidgetBlueprint), "WBP_");
 
-    Patterns.Add({ UUserDefinedStruct::StaticClass(), {}, "F", "" });
-    Patterns.Add({ UUserDefinedEnum::StaticClass(), {}, "E", "" });
+    DEF_PREFIX(STATIC_OBJECT(UUserDefinedStruct), "F");
+    DEF_PREFIX(STATIC_OBJECT(UUserDefinedEnum), "E");
 
-    Patterns.Add({ UMaterialInstanceConstant::StaticClass(), {}, "MI_", "" });
-    Patterns.Add({ UMaterial::StaticClass(), {}, "M_", "" });
+    DEF_PREFIX(STATIC_OBJECT(UMaterialInstanceConstant), "MI_");
+    DEF_PREFIX(STATIC_OBJECT(UMaterial), "M_");
     
-    Patterns.Add({ UStaticMesh::StaticClass(), {}, "SM_", "" });
-    Patterns.Add({ USkeletalMesh::StaticClass(), {}, "SK_", "" });
+    DEF_PREFIX(STATIC_OBJECT(UStaticMesh), "SM_");
+    DEF_PREFIX(STATIC_OBJECT(USkeletalMesh), "SK_");
 
-    //Patterns.Add({ UTexture::StaticClass(), {}, "T_", "_?" });
-    //Patterns.Add({ URenderTarget::StaticClass(), {}, "RT_", "" });
-    //Patterns.Add({ UMediaTexture::StaticClass(), {}, "MT_", "" });
+    DEF_PREFIX(STATIC_OBJECT(UTexture), "T_");
+    DEF_PREFIX(STATIC_OBJECT(UTextureRenderTarget2D), "RT_");
+    DEF_PREFIX(STATIC_OBJECT(UTextureRenderTargetCube), "RTC_");
+    DEF_PREFIX(NAMED_OBJECT(MediaAssets.MediaTexture), "MT_");
+    DEF_PREFIX(NAMED_OBJECT(MediaAssets.MediaPlayer), "MP_");
 
-    Patterns.Add({ UParticleSystem::StaticClass(), {}, "PS_", "" });
+    DEF_PREFIX(STATIC_OBJECT(UParticleSystem), "PS_");
 
-    /*Patterns.Add({ UAimOffset::StaticClass(), {}, "AO_", "" });
-    Patterns.Add({ UAimOffset1D::StaticClass(), {}, "AO_", "" });
-    Patterns.Add({ UAnimationComposite::StaticClass(), {}, "AC_", "" });
-    Patterns.Add({ UAnimationMontage::StaticClass(), {}, "AM_", "" });
-    Patterns.Add({ UAnimationSequence::StaticClass(), {}, "A_", "" });*/
-    Patterns.Add({ UBlendSpace::StaticClass(), {}, "BS_", "" });
-    Patterns.Add({ UBlendSpace1D::StaticClass(), {}, "BS_", "" });
+    DEF_PREFIX(NAMED_OBJECT(Engine.AimOffsetBlendSpace), "AO_");
+    DEF_PREFIX(NAMED_OBJECT(Engine.AimOffsetBlendSpace1D), "AO_");
+    DEF_PREFIX(NAMED_OBJECT(Engine.AnimComposite), "AC_");
+    DEF_PREFIX(NAMED_OBJECT(Engine.AnimMontage), "AM_");
+    DEF_PREFIX(NAMED_OBJECT(Engine.AnimSequence), "A_");
+    DEF_PREFIX(STATIC_OBJECT(UBlendSpace), "BS_");
+    DEF_PREFIX(STATIC_OBJECT(UBlendSpace1D), "BS_");
 
-    //Patterns.Add({ ULevelSequence::StaticClass(), {}, "LS_", "" });
-    Patterns.Add({ URig::StaticClass(), {}, "Rig_", "" });
-    Patterns.Add({ USkeleton::StaticClass(), {}, "Skel_", "" });
+    DEF_PREFIX(STATIC_OBJECT(URig), "Rig_");
+    DEF_PREFIX(STATIC_OBJECT(USkeleton), "Skel_");
+
+    DEF_PREFIX(NAMED_OBJECT(Engine.Font), "Font_");
     
     return Patterns;
 }
