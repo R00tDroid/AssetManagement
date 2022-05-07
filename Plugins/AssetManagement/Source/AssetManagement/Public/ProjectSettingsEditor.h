@@ -50,10 +50,13 @@ private:
         DisplayName = "Settings storage")
     EProjectSettingStorage SettingStorage = EProjectSettingStorage::PSS_PerUser;
 
+    //TODO rescan assets when changed
     UPROPERTY(EditAnywhere, Category = Assets, meta = (
         DisplayName = "Assets naming conventions", ShowOnlyInnerProperties))
     TMap<TSubclassOf<UObject>, FNamingConventionList> NamingConventions;
 
+    //TODO rescan assets when changed
+    //TODO warning user if no levels are set
     UPROPERTY(EditAnywhere, Category = Assets, meta = (
         DisplayName = "Playable levels", ShowOnlyInnerProperties))
     TArray<UWorld*> PlayableLevels;
