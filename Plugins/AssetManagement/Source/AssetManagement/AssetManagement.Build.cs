@@ -11,9 +11,8 @@ public class AssetManagement : ModuleRules
             {
                 "Core"
             }
-            );
+        );
             
-        
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {

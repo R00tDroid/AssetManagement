@@ -10,8 +10,8 @@ DECLARE_LOG_CATEGORY_EXTERN(AssetManagementLog, Log, All);
 class FAssetManagementModule : public IModuleInterface
 {
 public:
-    virtual void StartupModule() override;
-    virtual void ShutdownModule() override;
+    void StartupModule() override;
+    void ShutdownModule() override;
 
     UProjectSettingsEditor* GetSettingsEditor();
 

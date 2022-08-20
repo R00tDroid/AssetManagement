@@ -19,7 +19,6 @@ TSharedPtr<FUICommandList> AssetManagementCommands::menu_commands;
 
 AssetManagementCommands::AssetManagementCommands() : TCommands<AssetManagementCommands>("", FText(), "", FEditorStyle::GetStyleSetName())
 {
-
 }
 
 void AssetManagementCommands::RegisterCommands()
@@ -45,7 +44,6 @@ void AssetManagementCommands::BindCommands()
             manager->FixAllRedirectors();
         }
     }));
-    
 }
 
 void AssetManagementCommands::BuildMenu(FMenuBarBuilder& MenuBuilder)

@@ -14,15 +14,23 @@ class SWidgetAssetManagement : public SExtendedWidget
     SLATE_END_ARGS()
 
 public:
-
     virtual void Construct(const FArguments& InArgs);
-    virtual void Start() override;
+    void Start() override;
 
     FReply RequestRescan();
 
 private:
-    void PopulateAssets();
+    // Apply all available actions
     void ApplyAll(int Index);
+
+    // Populate the asset list
+    void PopulateAssets();
+
+    // Resize the list of widgets to fit the given amount of assets
+    void ResizeList(int AmountOfAssets, TArray<IAssetAction*>& AssetActions);
+
+    // Update the visual represenation of the asset list
+    void UpdateAssetList(TArray<FAssetInfo>& Assets, TArray<IAssetAction*>& AssetActions);
     
     TSharedPtr<SVerticalBox> asset_list;
     TArray<int> FilteredActions;
@@ -35,7 +43,6 @@ private:
 class SActionToolTip : public SToolTip
 {
 public:
-
     SLATE_BEGIN_ARGS(SActionToolTip) { }
     SLATE_END_ARGS()
 

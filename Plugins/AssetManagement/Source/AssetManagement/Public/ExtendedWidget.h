@@ -1,10 +1,10 @@
 #pragma once
 #include "Widgets/SUserWidget.h"
 
-class SExtendedWidget : public SCompoundWidget {
-
+class SExtendedWidget : public SCompoundWidget 
+{
 public:
-    virtual void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
+    void Tick(const FGeometry& AllottedGeometry, const double InCurrentTime, const float InDeltaTime) override;
     virtual void Start() {};
 
 private:
