@@ -14,9 +14,8 @@ class SWidgetAssetManagement : public SExtendedWidget
     SLATE_END_ARGS()
 
 public:
-
     virtual void Construct(const FArguments& InArgs);
-    virtual void Start() override;
+    void Start() override;
 
     FReply RequestRescan();
 
@@ -35,7 +34,6 @@ private:
 class SActionToolTip : public SToolTip
 {
 public:
-
     SLATE_BEGIN_ARGS(SActionToolTip) { }
     SLATE_END_ARGS()
 

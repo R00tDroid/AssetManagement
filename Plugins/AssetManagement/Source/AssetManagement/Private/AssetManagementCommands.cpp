@@ -19,7 +19,6 @@ TSharedPtr<FUICommandList> AssetManagementCommands::menu_commands;
 
 AssetManagementCommands::AssetManagementCommands() : TCommands<AssetManagementCommands>("", FText(), "", FEditorStyle::GetStyleSetName())
 {
-
 }
 
 void AssetManagementCommands::RegisterCommands()

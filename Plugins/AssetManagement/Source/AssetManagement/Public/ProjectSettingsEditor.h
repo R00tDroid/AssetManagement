@@ -64,8 +64,8 @@ private:
     void SaveConfig();
     void LoadConfig();
     
-    virtual void PostInitProperties() override;
+    void PostInitProperties() override;
 #if WITH_EDITOR
-    virtual bool CanEditChange(const FProperty* InProperty) const override;
+    bool CanEditChange(const FProperty* InProperty) const override;
 #endif
 };
