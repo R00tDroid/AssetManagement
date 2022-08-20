@@ -44,7 +44,6 @@ void AssetManagementCommands::BindCommands()
             manager->FixAllRedirectors();
         }
     }));
-    
 }
 
 void AssetManagementCommands::BuildMenu(FMenuBarBuilder& MenuBuilder)
