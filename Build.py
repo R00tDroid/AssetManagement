@@ -33,7 +33,7 @@ res_error = 0
 for version in versions:
 	print("Building version: " + version)
 	
-	cmd = "call \"" + install_dir + "\\UE_" + version + "\\Engine\\Build\\BatchFiles\\RunUAT.bat\" BuildPlugin -Plugin=\"" +  root + "\Plugins\AssetManagement\AssetManagement.uplugin\" -Package=\"" + out_dir + "\AssetManagement_" + version + "\" -Rocket"
+	cmd = "call \"" + install_dir + "\\UE_" + version + "\\Engine\\Build\\BatchFiles\\RunUAT.bat\" BuildPlugin -Plugin=\"" + root + "\Plugins\AssetManagement\AssetManagement.uplugin\" -Package=\"" + out_dir + "\AssetManagement_" + version + "\" -Rocket"
 	result = os.system(cmd)
 	
 	if result is not 0:
