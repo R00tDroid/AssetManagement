@@ -20,8 +20,17 @@ public:
     FReply RequestRescan();
 
 private:
-    void PopulateAssets();
+    // Apply all available actions
     void ApplyAll(int Index);
+
+    // Populate the asset list
+    void PopulateAssets();
+
+    // Resize the list of widgets to fit the given amount of assets
+    void ResizeList(int AmountOfAssets, TArray<IAssetAction*>& AssetActions);
+
+    // Update the visual represenation of the asset list
+    void UpdateAssetList(TArray<FAssetInfo>& Assets, TArray<IAssetAction*>& AssetActions);
     
     TSharedPtr<SVerticalBox> asset_list;
     TArray<int> FilteredActions;

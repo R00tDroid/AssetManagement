@@ -204,7 +204,39 @@ void SWidgetAssetManagement::PopulateAssets()
         Assets.RemoveAt(Assets.Num() - 1);
     }
 
-    int difference = Assets.Num() - asset_list.Get()->GetChildren()->Num();
+    ResizeList(Assets.Num(), AssetActions);
+
+    UpdateAssetList(Assets, AssetActions);
+}
+
+void SWidgetAssetManagement::ApplyAll(int Index)
+{
+    TArray<FAssetInfo> Assets;
+    TArray<FAssetData> ToApplyFor;
+
+    AssetManager* manager = AssetManager::Get();
+    if (manager != nullptr)
+    {
+        Assets = manager->GetAssets();
+    }
+
+    for (FAssetInfo& Asset : Assets)
+    {
+        if(Asset.ActionResults.Contains(Index))
+        {
+            ToApplyFor.Add(Asset.Data);
+        }
+    }
+
+    if (Assets.Num() > 0)
+    {
+        manager->RequestActionExecution(Index, ToApplyFor);
+    }
+}
+
+void SWidgetAssetManagement::ResizeList(int AmountOfAssets, TArray<IAssetAction*>& AssetActions)
+{
+    int difference = AmountOfAssets - asset_list.Get()->GetChildren()->Num();
     int pre_count = asset_list.Get()->GetChildren()->Num();
 
     if (difference > 0)
@@ -279,7 +311,10 @@ void SWidgetAssetManagement::PopulateAssets()
                 asset_list.Get()->GetChildren()->GetChildAt(asset_list.Get()->GetChildren()->Num() - 1));
         }
     }
+}
 
+void SWidgetAssetManagement::UpdateAssetList(TArray<FAssetInfo>& Assets, TArray<IAssetAction*>& AssetActions)
+{
     for (int i = 0; i < asset_list.Get()->GetChildren()->Num(); i++)
     {
         SHorizontalBox* container = static_cast<SHorizontalBox*>(&asset_list.Get()->GetChildren()->GetChildAt(i).Get());
@@ -327,30 +362,5 @@ void SWidgetAssetManagement::PopulateAssets()
 
             return FReply::Handled();
         }));
-    }
-}
-
-void SWidgetAssetManagement::ApplyAll(int Index)
-{
-    TArray<FAssetInfo> Assets;
-    TArray<FAssetData> ToApplyFor;
-
-    AssetManager* manager = AssetManager::Get();
-    if (manager != nullptr)
-    {
-        Assets = manager->GetAssets();
-    }
-
-    for (FAssetInfo& Asset : Assets)
-    {
-        if(Asset.ActionResults.Contains(Index))
-        {
-            ToApplyFor.Add(Asset.Data);
-        }
-    }
-
-    if (Assets.Num() > 0)
-    {
-        manager->RequestActionExecution(Index, ToApplyFor);
     }
 }
