@@ -7,13 +7,11 @@ const FName assetmanager_tab = FName(TEXT("AssetManagerTab"));
 class AssetManagementCommands : public TCommands<AssetManagementCommands>
 {
 private:
-
     friend class TCommands<AssetManagementCommands>;
 
     AssetManagementCommands();
 
 public:
-
     void RegisterCommands() override;
 
     static void BindCommands();
