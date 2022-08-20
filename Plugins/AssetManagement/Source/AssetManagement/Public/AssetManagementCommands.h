@@ -14,7 +14,7 @@ private:
 
 public:
 
-    virtual void RegisterCommands() override;
+    void RegisterCommands() override;
 
     static void BindCommands();
 

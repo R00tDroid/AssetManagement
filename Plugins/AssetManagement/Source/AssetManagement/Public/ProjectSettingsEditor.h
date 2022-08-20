@@ -42,7 +42,7 @@ class UProjectSettingsEditor : public UObject
 public:
     static UProjectSettingsEditor& Get();
 
-    virtual void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
+    void PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent) override;
 
 private:
     UPROPERTY(EditAnywhere, Category = Settings, meta = (
