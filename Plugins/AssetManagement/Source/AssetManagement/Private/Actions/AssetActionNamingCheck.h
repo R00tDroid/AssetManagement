@@ -71,6 +71,5 @@ private:
 
     FString GetNameForAsset(FString Name, UClass* Class, UObject* Object);
     
-private:
     FDelegateHandle OnConfigChangedHandle;
 };
