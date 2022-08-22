@@ -297,8 +297,11 @@ TArray<FNamingPattern> AssetActionNamingCheck::JsonToNamingPatterns(const FStrin
     return Patterns;
 }
 
-//TODO 4.26 compatibility
-#define FindPropertyValue(PropType, TargetVar, PropClass, PropName, PropObject) U##PropType##Property* Prop = FindField<U##PropType##Property>(PropClass, PropName); if (Prop != nullptr) { TargetVar = Prop->GetPropertyValue_InContainer(PropObject); }
+#if ENGINE_MAJOR_VERSION == 4 && ENGINE_MINOR_VERSION < 26
+    #define FindPropertyValue(PropType, TargetVar, PropClass, PropName, PropObject) U##PropType##Property* Prop = FindField<U##PropType##Property>(PropClass, PropName); if (Prop != nullptr) { TargetVar = Prop->GetPropertyValue_InContainer(PropObject); }
+#else
+    #define FindPropertyValue(PropType, TargetVar, PropClass, PropName, PropObject) F##PropType##Property* Prop = FindFProperty<F##PropType##Property>(PropClass, PropName); if (Prop != nullptr) { TargetVar = Prop->GetPropertyValue_InContainer(PropObject); }
+#endif
 
 FString GetObjectProperty(UClass* Class, UObject* Object, FString PropertyName, EClassPropertyType PropertyType)
 {
