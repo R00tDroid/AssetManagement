@@ -3,6 +3,7 @@
 #include "Widgets/Docking/SDockTab.h"
 #include "AssetManagementWidget.h"
 #include "AssetManagementCommands.h"
+#include "AssetManagementStyle.h"
 #include "ISettingsModule.h"
 
 #define LOCTEXT_NAMESPACE "FAssetManagementModule"
@@ -11,6 +12,8 @@ DEFINE_LOG_CATEGORY(AssetManagementLog);
 
 void FAssetManagementModule::StartupModule()
 {
+    FAssetManagementStyle::Init();
+
     AssetManagementCommands::Register();
     AssetManagementCommands::BindCommands();
 
@@ -60,6 +63,8 @@ void FAssetManagementModule::ShutdownModule()
     {
         tab_manager->UnregisterTabSpawner(assetmanager_tab);
     }
+
+    FAssetManagementStyle::Release();
 }
 
 UProjectSettingsEditor* FAssetManagementModule::GetSettingsEditor()

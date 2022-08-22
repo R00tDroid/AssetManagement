@@ -11,6 +11,7 @@
 #include "IAssetRegistry.h"
 #include "Editor.h"
 #include "AssetMagementConfig.h"
+#include "AssetManagementStyle.h"
 
 void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 {
@@ -267,18 +268,18 @@ void SWidgetAssetManagement::ResizeList(int AmountOfAssets, TArray<IAssetAction*
                 [
                     SNew(SBox)
                     .WidthOverride(20)
-                .HeightOverride(20)
-                [
-                    SNew(SButton)
-                    .ForegroundColor(FSlateColor(FLinearColor(0, 0, 0, 0)))
-                .ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
-                .ContentPadding(4.0f)
-                .ForegroundColor(FSlateColor::UseForeground())
-                [
-                    SNew(SImage)
-                    .Image(FEditorStyle::GetBrush("PropertyWindow.Button_Browse"))
-                .ColorAndOpacity(FSlateColor::UseForeground())
-                ]
+                    .HeightOverride(20)
+                    [
+                        SNew(SButton)
+                        .ForegroundColor(FSlateColor(FLinearColor(0, 0, 0, 0)))
+                        .ButtonStyle(FEditorStyle::Get(), "HoverHintOnly")
+                        .ContentPadding(4.0f)
+                        .ForegroundColor(FSlateColor::UseForeground())
+                    [
+                        SNew(SImage)
+                        .Image(FEditorStyle::GetBrush("PropertyWindow.Button_Browse"))
+                        .ColorAndOpacity(FSlateColor::UseForeground())
+                    ]
                 ]
                 ]
 
@@ -299,6 +300,11 @@ void SWidgetAssetManagement::ResizeList(int AmountOfAssets, TArray<IAssetAction*
                 button_slot[
                     SNew(SButton)
                     .ToolTip(SNew(SActionToolTip))
+                    [
+                        SNew(SImage)
+                        .Image(FAssetManagementStyle::Get().GetBrush(FName(AssetActions[j]->GetButtonStyleName())))
+                        .ColorAndOpacity(FSlateColor::UseForeground())
+                    ]
                 ];
             }
         }

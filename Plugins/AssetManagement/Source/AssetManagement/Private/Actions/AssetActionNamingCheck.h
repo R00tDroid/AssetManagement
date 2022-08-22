@@ -59,6 +59,8 @@ public:
     FString GetFilterName() override { return "Naming conventions"; }
     FString GetApplyAllTag() override { return "Apply all naming conventions"; }
 
+    FString GetButtonStyleName() override { return "Action.Naming"; }
+
     static TArray<FNamingPattern> GetDefaultPatterns();
 
     static FString NamingPatternsToJson(const TArray<FNamingPattern>&);
@@ -68,6 +70,6 @@ private:
     TArray<FNamingPattern> NamingPatterns;
 
     FString GetNameForAsset(FString Name, UClass* Class, UObject* Object);
-
+    
     FDelegateHandle OnConfigChangedHandle;
 };
