@@ -20,4 +20,6 @@ public:
 
     virtual FString GetFilterName() = 0;
     virtual FString GetApplyAllTag() = 0;
+
+    virtual FString GetButtonStyleName() = 0;
 };
