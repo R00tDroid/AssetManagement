@@ -10,7 +10,7 @@
 #include "EditorStyleSet.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Editor.h"
-#include "AssetMagementConfig.h"
+#include "AssetManagementConfig.h"
 #include "AssetManagementStyle.h"
 
 #if ENGINE_MAJOR_VERSION == 5

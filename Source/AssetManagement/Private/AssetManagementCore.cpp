@@ -1,4 +1,4 @@
-#include "AssetMagementCore.h"
+#include "AssetManagementCore.h"
 #include "AssetManagementModule.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "Actions/AssetActionUnusedCheck.h"
@@ -8,7 +8,7 @@
 #include "Editor.h"
 #include "Widgets/Notifications/SNotificationList.h"
 #include "AssetToolsModule.h"
-#include "AssetMagementConfig.h"
+#include "AssetManagementConfig.h"
 
 AssetManager* instance_ = nullptr;
 

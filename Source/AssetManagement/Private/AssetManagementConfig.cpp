@@ -1,4 +1,4 @@
-#include "AssetMagementConfig.h"
+#include "AssetManagementConfig.h"
 #include "Misc/ConfigCacheIni.h"
 #include "Interfaces/IPluginManager.h"
 

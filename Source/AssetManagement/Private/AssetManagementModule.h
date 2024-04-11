@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Modules/ModuleManager.h"
-#include "AssetMagementCore.h"
+#include "AssetManagementCore.h"
 #include "ProjectSettingsEditor.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(AssetManagementLog, Log, All);

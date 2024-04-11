@@ -1,5 +1,5 @@
 #include "ProjectSettingsEditor.h"
-#include "AssetMagementConfig.h"
+#include "AssetManagementConfig.h"
 #include "AssetManagementModule.h"
 #include "Actions/AssetActionNamingCheck.h"
 

@@ -4,7 +4,7 @@
 #include "Modules/ModuleManager.h"
 #include "EditorStyleSet.h"
 #include "LevelEditor.h"
-#include "AssetMagementCore.h"
+#include "AssetManagementCore.h"
 
 #define LOCTEXT_NAMESPACE "AssetManagementModule"
 
