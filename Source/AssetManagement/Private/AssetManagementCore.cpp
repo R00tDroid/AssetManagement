@@ -169,7 +169,11 @@ void AssetManager::FixAllRedirectors()
     IAssetRegistry& AssetRegistry = AssetRegistryModule.Get();
 
     FARFilter filter;
+#if ENGINE_MAJOR_VERSION == 5 && ENGINE_MINOR_VERSION >= 1
+    filter.ClassPaths.Add(UObjectRedirector::StaticClass()->GetClassPathName());
+#else
     filter.ClassNames.Add(UObjectRedirector::StaticClass()->GetFName());
+#endif
     filter.bRecursivePaths = true;
     filter.PackagePaths.Add("/Game");
 
