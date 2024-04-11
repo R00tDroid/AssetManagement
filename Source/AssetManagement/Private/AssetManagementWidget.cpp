@@ -7,11 +7,17 @@
 #include "Widgets/Input/SNumericEntryBox.h"
 #include "Async/Async.h"
 #include "EditorStyle.h"
-#include "AssetRegistryModule.h"
-#include "IAssetRegistry.h"
+#include "EditorStyleSet.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Editor.h"
 #include "AssetMagementConfig.h"
 #include "AssetManagementStyle.h"
+
+#if ENGINE_MAJOR_VERSION == 5
+#define GetCompatibleWidget GetAttachedWidget().ToSharedRef()
+#else
+#define GetCompatibleWidget GetWidget()
+#endif
 
 void SWidgetAssetManagement::Construct(const FArguments& InArgs)
 {
@@ -90,10 +96,10 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
     {
         FilteredActions.Add(i);
         
-        SGridPanel::FSlot& checkbox_slot = FilterGrid->AddSlot(0, i);
+        auto checkbox_slot = FilterGrid->AddSlot(0, i);
         checkbox_slot.VAlign(EVerticalAlignment::VAlign_Center);
 
-        SGridPanel::FSlot& name_slot = FilterGrid->AddSlot(1, i);
+        auto name_slot = FilterGrid->AddSlot(1, i);
         name_slot.VAlign(EVerticalAlignment::VAlign_Center);
 
         checkbox_slot
@@ -121,11 +127,10 @@ void SWidgetAssetManagement::Construct(const FArguments& InArgs)
             .Text(FText::FromString(AssetActions[i]->GetFilterName()))
         ];
 
-        TSharedRef<SCheckBox> checkbox = StaticCastSharedRef<SCheckBox>(checkbox_slot.GetWidget());
+        TSharedRef<SCheckBox> checkbox = StaticCastSharedRef<SCheckBox>(checkbox_slot.GetCompatibleWidget);
         checkbox->SetIsChecked(ECheckBoxState::Checked);
-
-
-        SGridPanel::FSlot& apply_all_slot = FilterGrid->AddSlot(2, i);
+        
+        auto apply_all_slot = FilterGrid->AddSlot(2, i);
         checkbox_slot.VAlign(EVerticalAlignment::VAlign_Fill);
         apply_all_slot.Padding(10, 0, 0, 0);
 
@@ -248,7 +253,7 @@ void SWidgetAssetManagement::ResizeList(int AmountOfAssets, TArray<IAssetAction*
 
             TSharedPtr<SHorizontalBox> ButtonContainer;
 
-            SVerticalBox::FSlot& slot = asset_list->AddSlot();
+            auto slot = asset_list->AddSlot();
             slot
             [
                 SNew(SHorizontalBox)
@@ -294,7 +299,7 @@ void SWidgetAssetManagement::ResizeList(int AmountOfAssets, TArray<IAssetAction*
 
             for (int j = 0; j < AssetActions.Num(); j++)
             {
-                SHorizontalBox::FSlot& button_slot = ButtonContainer->AddSlot();
+                auto button_slot = ButtonContainer->AddSlot();
                 button_slot.Padding(2);
                 
                 button_slot[

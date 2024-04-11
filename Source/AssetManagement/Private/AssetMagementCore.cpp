@@ -1,6 +1,6 @@
 #include "AssetMagementCore.h"
 #include "AssetManagementModule.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "Actions/AssetActionUnusedCheck.h"
 #include "Actions/AssetActionRedirector.h"
 #include "Actions/AssetActionNamingCheck.h"
@@ -298,7 +298,7 @@ void AssetManager::PrepareAssetList()
 {
     Assets.Sort([](const FAssetInfo& A, const FAssetInfo& B)
     {
-        return A.Data.PackageName < B.Data.PackageName;
+        return A.Data.PackageName.Compare(B.Data.PackageName) > 0;
     });
 }
 

@@ -1,5 +1,4 @@
 #include "AssetActionRedirector.h"
-#include "AssetRegistryModule.h"
 #include "AssetToolsModule.h"
 
 void AssetActionRedirector::ScanAssets(TArray<FAssetInfo>& Assets, uint16 AssignedId)

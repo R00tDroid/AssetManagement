@@ -8,7 +8,7 @@
 
 #define LOCTEXT_NAMESPACE "AssetManagementModule"
 
-#if ENGINE_MINOR_VERSION > 25
+#if ENGINE_MINOR_VERSION > 25 || ENGINE_MAJOR_VERSION > 4
     #define CompatibleInvokeTab TryInvokeTab
 #else
     #define CompatibleInvokeTab InvokeTab

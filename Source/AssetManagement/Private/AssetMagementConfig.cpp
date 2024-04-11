@@ -1,7 +1,6 @@
 #include "AssetMagementConfig.h"
 #include "Misc/ConfigCacheIni.h"
-#include "FileManager.h"
-#include "IPluginManager.h"
+#include "Interfaces/IPluginManager.h"
 
 AssetManagerConfig AssetManagerConfig::instance;
 AssetManagerConfig::FOnConfigChanged AssetManagerConfig::OnConfigChanged;

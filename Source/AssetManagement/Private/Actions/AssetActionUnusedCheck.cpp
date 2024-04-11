@@ -1,5 +1,5 @@
 #include "AssetActionUnusedCheck.h"
-#include "AssetRegistryModule.h"
+#include "AssetRegistry/AssetRegistryModule.h"
 #include "ObjectTools.h"
 
 void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 AssignedId)

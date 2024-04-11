@@ -8,8 +8,6 @@
 #include "FileHelpers.h"
 #include "ISourceControlModule.h"
 #include "Dom/JsonValue.h"
-#include "JsonSerializer.h"
-#include "JsonWriter.h"
 
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceConstant.h"
