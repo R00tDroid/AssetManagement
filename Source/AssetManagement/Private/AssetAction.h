@@ -1,4 +1,5 @@
 #pragma once
+#include <AssetRegistry/AssetData.h>
 
 struct FAssetInfo
 {

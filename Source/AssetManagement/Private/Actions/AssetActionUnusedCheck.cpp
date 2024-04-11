@@ -55,7 +55,9 @@ void AssetActionUnusedCheck::ScanAssets(TArray<FAssetInfo>& Assets, uint16 Assig
 
     for (FAssetInfo& Asset : Assets)
     {
-        if (!References.Contains(Asset.Data.PackageName) && Asset.Data.GetClass() != UObjectRedirector::StaticClass())
+        bool IsReferenced = References.Contains(Asset.Data.PackageName);
+        bool IsRedirector = Asset.Data.GetClass() == UObjectRedirector::StaticClass();
+        if (!IsReferenced && !IsRedirector)
         {
             Asset.ActionResults.Add(AssignedId, "");
         }
