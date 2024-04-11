@@ -15,8 +15,10 @@
 
 #if ENGINE_MAJOR_VERSION == 5
 #define GetCompatibleWidget GetAttachedWidget().ToSharedRef()
+#define NavigateToIcon "ContentBrowser.ShowInExplorer"
 #else
 #define GetCompatibleWidget GetWidget()
+#define NavigateToIcon "PropertyWindow.Button_Browse"
 #endif
 
 void SWidgetAssetManagement::Construct(const FArguments& InArgs)
@@ -282,7 +284,7 @@ void SWidgetAssetManagement::ResizeList(int AmountOfAssets, TArray<IAssetAction*
                         .ForegroundColor(FSlateColor::UseForeground())
                     [
                         SNew(SImage)
-                        .Image(FEditorStyle::GetBrush("PropertyWindow.Button_Browse"))
+                        .Image(FEditorStyle::GetBrush(NavigateToIcon))
                         .ColorAndOpacity(FSlateColor::UseForeground())
                     ]
                 ]
