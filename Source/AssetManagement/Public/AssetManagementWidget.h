@@ -1,0 +1,92 @@
+#pragma once
+#include "ExtendedWidget.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/SToolTip.h"
+#include "Widgets/Layout/SSeparator.h"
+#include "AssetAction.h"
+
+class SWidgetAssetManagement : public SExtendedWidget
+{
+    SLATE_USER_ARGS(SWidgetAssetManagement)
+    { }
+
+    SLATE_END_ARGS()
+
+public:
+    virtual void Construct(const FArguments& InArgs);
+    void Start() override;
+
+    FReply RequestRescan();
+
+private:
+    // Apply all available actions
+    void ApplyAll(int Index);
+
+    // Populate the asset list
+    void PopulateAssets();
+
+    // Resize the list of widgets to fit the given amount of assets
+    void ResizeList(int AmountOfAssets, TArray<IAssetAction*>& AssetActions);
+
+    // Update the visual represenation of the asset list
+    void UpdateAssetList(TArray<FAssetInfo>& Assets, TArray<IAssetAction*>& AssetActions);
+    
+    TSharedPtr<SVerticalBox> asset_list;
+    TArray<int> FilteredActions;
+
+    uint16 MaxAssetsInList = 500;
+};
+
+
+
+class SActionToolTip : public SToolTip
+{
+public:
+    SLATE_BEGIN_ARGS(SActionToolTip) { }
+    SLATE_END_ARGS()
+
+public:
+    void Construct(const FArguments& InArgs)
+    {
+        SToolTip::Construct(
+            SToolTip::FArguments()
+            .Content()
+            [
+                SNew(SVerticalBox)
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(heading, STextBlock)
+                ]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                .Padding(2)
+                [
+                    SNew(SSeparator)
+                    .Orientation(Orient_Horizontal)]
+
+                + SVerticalBox::Slot()
+                .AutoHeight()
+                [
+                    SAssignNew(content, STextBlock)
+                ]
+            ]
+        );
+    }
+
+    void SetHeading(FString text)
+    {
+        heading->SetText(FText::FromString(text));
+    }
+
+    void SetContent(FString text)
+    {
+        content->SetText(FText::FromString(text));
+    }
+
+private:
+    TSharedPtr<STextBlock> heading;
+    TSharedPtr<STextBlock> content;
+};

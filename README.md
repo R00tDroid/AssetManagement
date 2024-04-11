@@ -18,7 +18,7 @@ A plugin for Unreal Engine to help developers organize and manage their assets. 
 ### Settings
 You can change the plugin settings at `Edit > Editor Preferences > Advanced > Advanced Asset actions`
 
-![Image of settings window](Img/Settings.PNG)
+![Image of settings window](Docs/Settings.PNG)
 
 The settings can be stored in different locations:
 * *Project*: Settings will be stored in the project config and get shared with other developers
@@ -27,6 +27,6 @@ The settings can be stored in different locations:
 ### Asset Management
 Most actions are handled through the same panel. It can be opened here: `Asset Tools > Asset Manager`
 
-![Image of asset manager window](Img/AssetManager.PNG)
+![Image of asset manager window](Docs/AssetManager.PNG)
 
 This window shows a list of assets which have one or more pending actions. These actions can be performed by pressing the related button next to the asset.
